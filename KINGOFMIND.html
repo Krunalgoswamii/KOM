@@ -906,23 +906,30 @@ function showReverseModePopup() {
     });
 
     // Apply penalties to losers
-    players.forEach(player => {
-    if (!winners.includes(player) && player.selectedNumber !== null) {
-        let penalty = 1; // Default normal penalty
-        const winner = winners[0]; // Single winner
+players.forEach(player => {
+if (!winners.includes(player) && player.selectedNumber !== null) {
+let penalty = 1; // Default normal penalty
+let penaltyText = "";
 
-        if (players.length === 2) { // 2 players special rule
-    if (loseStreak[player.name] <= 2) {
-        penalty = 1; // pehle 2 haar par normal -1
-    } else {
-        penalty = Math.pow(2, loseStreak[player.name] - 3) * 2; // 3rd haar se double penalty
-    }
+// 1. Check for 3 Players Exact Match Rule (Agar penaltyMultiplier 2 hai, to double penalty lagao)
+// (Jaise ki aapne line 189 par set kiya tha)
+if (penaltyMultiplier === 2) {
+penalty = 2;
+penaltyText = " (Exact Match Double Penalty)";
 }
 
-        player.score -= penalty;
-        player.losses += 1;
-        scoreChanges.push(`⚠ <span class='highlight-yellow'>${player.name} lost ${penalty} point(s)${penalty === 2 ? " (Double Penalty Due to Winning Streak!)" : ""}</span>`);
-    }
+// 2. Check for 2 Players Compounding Penalty (Yeh logic Exact Match penalty ko override karega, agar lose streak zyada ho)
+if (players.length === 2 && loseStreak[player.name] > 2) {
+// 3rd loss se compounding start hoti he
+penalty = Math.pow(2, loseStreak[player.name] - 3) * 2;
+penaltyText = " (Lose Streak Compounding Penalty)";
+}
+
+player.score -= penalty;
+player.losses += 1;
+
+scoreChanges.push(`⚠ <span class='highlight-yellow'>${player.name} lost ${penalty} point(s)${penaltyText}</span>`);
+}
 });
     // Track eliminated players
     players.forEach(player => {
@@ -1082,10 +1089,9 @@ const winnerAchievements = [
 
 const eliminatedAchievements = [
     { title: "💀 Aapse Nahi Hoga", emoji: "💀" },
-    { title: "🤣 The Joker", emoji: "🤣" },
     { title: "🚀 Shuru Hote hi Khatam", emoji: "🚀" },
     { title: "🎭 King of Bad Luck", emoji: "🎭" },
-    { title: "🕵️ Mysterious Player", emoji: "🕵️" },
+    { title: "🕵️ Kaha Khoye Ho", emoji: "🕵️" },
     { title: "🧠 Dimag se Khelna he Ghutno se Nahi", emoji: "🧠" },
     { title: "🤡 Sunday Aana Mast Nah Dhoh ke", emoji: "🤡" },
     { title: "🐵 Bandar Kya Jane Adrak ka Swad", emoji: "🐵" },
@@ -1128,3 +1134,4 @@ for (let i = 0; i < 50; i++) {
     </script>
 </body>
 </html>
+
