@@ -29,14 +29,27 @@
             margin: 0;
             line-height: 1.5;
         }
-        .container { 
-            max-width: 1200px; 
-            margin: auto; 
-            background: #ffffff; 
-            padding: 40px; 
-            border-radius: 12px; 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
-        }
+        .container {
+position: relative; /* Ye bahut zaroori hai */
+max-width: 1200px;
+margin: auto;
+background: #ffffff;
+padding: 40px;
+border-radius: 12px;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Ye naya style add karein */
+.author-credit {
+position: absolute;
+top: 20px;
+right: 40px;
+font-size: 0.95rem; /* Medium size, na bada na chota */
+font-weight: 600;
+color: #64748B; /* Thoda greyish color taaki premium lage */
+font-family: 'Inter', sans-serif;
+letter-spacing: 0.5px;
+}
         
         /* Typography & Headers */
         h1 { 
@@ -275,6 +288,7 @@
 <body>
 
 <div class="container">
+    <div class="author-credit">By : Krunal Goswami</div>
     <h1>CM Payin/out (CASH & F&O Segments)</h1>
 
     <div class="date-section">
@@ -874,4 +888,5 @@
     }
 </script>
 </body>
+
 </html>
