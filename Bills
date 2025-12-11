@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>CM Payin/out (CASH & F&O Segments) Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables */
+        :root {
+            --accent-color: #00b670; 
+            --accent-dark: #007045;  
+            --accent-light: #d5e2e9; 
+            --text-dark: #1E293B; 
+            --border-color: #E2E8F0;
+            --success-color: #059669; 
+            --success-light: #D1FAE5; 
+            --danger-color: #EF4444; 
+            --transition-speed: 0.3s;
+            --highlight-color: #FFC107; /* New highlight color for date error (Yellow) */
+        }
+
+        /* Global & Layout Styles */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            padding: 40px; 
+            background-color: #F8FAFC; 
+            color: var(--text-dark);
+            margin: 0;
+            line-height: 1.5;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: auto; 
+            background: #ffffff; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
+        }
+        
+        /* Typography & Headers */
+        h1 { 
+            color: var(--text-dark); 
+            text-align: center; 
+            border-bottom: 2px solid var(--border-color); 
+            padding-bottom: 15px; 
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+        h2 { 
+            color: var(--accent-dark); 
+            margin-top: 0; 
+            padding-bottom: 8px; 
+            border-bottom: 2px solid var(--accent-color); 
+            font-weight: 600;
+            font-size: 1.5em;
+        }
+        
+        /* Date Section (Center Alignment) */
+        .date-section { 
+            padding: 10px 0; 
+            margin-bottom: 30px;
+            display: flex; 
+            justify-content: center; 
+        }
+        .date-input-container {
+            width: 300px; 
+            padding: 15px;
+            background-color: var(--accent-light);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        /* New: Date Error Highlight */
+        .date-input-container.error-highlight {
+            border: 2px solid var(--highlight-color);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+            animation: shake 0.5s;
+        }
+
+        .date-input-container label {
+             text-align: center; 
+             display: block;
+             margin-bottom: 8px;
+             font-weight: 600;
+        }
+        input[type="date"] {
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 4px; 
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        input[type="date"]:valid {
+            border-color: var(--success-color);
+        }
+
+        /* Smooth Transition Classes */
+        .smooth-transition {
+            opacity: 1;
+            max-height: 2000px; 
+            overflow: hidden;
+            transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out;
+        }
+        .hidden-section {
+            opacity: 0;
+            max-height: 0;
+            margin-bottom: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+
+        /* File Upload Layout */
+        .file-upload-layout {
+            display: flex;
+            gap: 40px; 
+        }
+        .file-section { 
+            flex: 1; 
+            margin-bottom: 40px; 
+            padding: 25px; 
+            border-radius: 8px; 
+            background-color: #ffffff; 
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* File Input Styling (Core) */
+        .file-input-group { 
+            margin-bottom: 15px; 
+            padding: 15px; 
+            border: 2px dashed var(--border-color); 
+            border-radius: 6px; 
+            position: relative;
+            cursor: pointer; 
+            overflow: hidden; 
+        }
+        .file-input-group:hover {
+            border-color: var(--accent-color);
+        }
+        
+        /* Progress Fill Animation Layer */
+        .progress-fill {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background-color: var(--success-light);
+            z-index: 1; 
+            transition: width 0.8s ease-out; 
+        }
+        /* Final Success State */
+        .file-input-group.upload-success .progress-fill {
+            width: 100%;
+            background-color: var(--success-light);
+            transition: none; 
+        }
+        .file-input-group.upload-success {
+            border-color: var(--success-color) !important;
+            border-style: solid; 
+        }
+        /* Success Icon Style */
+        .success-icon {
+            color: var(--success-color);
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+
+        /* File Input Text/Labels Layer */
+        .file-input-group label,
+        .file-input-group .validation-error {
+            position: relative;
+            z-index: 2; 
+        }
+
+        /* Input Hidden */
+        input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0; 
+            cursor: pointer;
+            z-index: 3; 
+        }
+        
+        /* Button Control Group Styling */
+        .control-group { 
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 30px;
+            align-items: center; 
+        }
+
+        .generate-button { 
+            background-color: var(--accent-color); 
+            color: white; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 1.1em; 
+            font-weight: 600; 
+            transition: var(--transition-speed); 
+            width: 100%;
+            max-width: 400px; 
+        }
+        .generate-button:hover:not(:disabled) { /* Disable hover effect when disabled */
+            background-color: var(--accent-dark); 
+            transform: translateY(-1px);
+        }
+        .generate-button:disabled { /* Style for disabled button (processing state) */
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .download-button {
+            background-color: #1E293B; 
+            padding: 10px 20px;
+            font-size: 1em;
+            width: 300px; 
+        }
+        .download-button:hover {
+             background-color: #475569;
+        }
+        
+        /* Table Styles (Same as before) */
+        #summaryTable { margin-top: 30px; width: 100%; border-collapse: collapse; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border-radius: 8px; overflow: hidden; }
+        #summaryTable th, #summaryTable td { border: 1px solid #F3F4F6; padding: 12px 15px; text-align: right; }
+        #summaryTable th { background-color: var(--text-dark); color: white; text-align: center; font-weight: 600; }
+        #summaryTable tr:nth-child(even) { background-color: #F9FAFB; }
+        .tm-code { text-align: center; font-weight: 500; color: var(--text-dark); }
+        .total-row td { background-color: #FEF3C7; font-weight: 700; color: var(--text-dark); font-size: 1.1em; }
+        .positive { color: var(--success-color); font-weight: 600; } 
+        .negative { color: var(--danger-color); font-weight: 600; } 
+        
+        /* Validation Styles */
+        .error-message { 
+            color: var(--danger-color); 
+            margin-top: 20px; 
+            font-weight: 600; 
+            text-align: center; 
+            padding: 10px; 
+            border: 1px solid var(--danger-color); 
+            border-radius: 4px; 
+            background-color: #FEF2F2; 
+        }
+        .date-error-message { /* Specific style for date selection error */
+            color: #B58400; /* Darker yellow/brown text */
+            border: 2px solid var(--highlight-color);
+            background-color: #FFFBEB; /* Lighter yellow background */
+        }
+
+        @keyframes shake { 
+            0%, 100% { transform: translateX(0); } 
+            20%, 60% { transform: translateX(-10px); } 
+            40%, 80% { transform: translateX(10px); } 
+        }
+        .shake-error { 
+            animation: shake 0.5s; 
+            border-color: var(--danger-color) !important; 
+            border-style: solid;
+        }
+        .validation-error { position: absolute; top: 5px; right: 15px; color: var(--danger-color); font-size: 12px; font-weight: 600; background-color: #FEF2F2; padding: 3px 6px; border-radius: 3px; z-index: 2; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>CM Payin/out (CASH & F&O Segments)</h1>
+
+    <div class="date-section">
+        <div class="date-input-container" id="dateContainer">
+            <label for="reportDate">Please Select Date</label>
+            <input type="date" id="reportDate" required onchange="resetUIOnDateChange()">
+        </div>
+    </div>
+    
+    <div id="inputSection" class="smooth-transition">
+        <div class="file-upload-layout">
+            
+            <div class="file-section">
+                <h2>CASH Files</h2>
+                <div class="file-input-group" id="group-obFileCM">
+                    <div class="progress-fill"></div>
+                    <label for="obFileCM">1. Obligation <span class="success-icon" id="icon-obFileCM" style="display:none;"></span></label>
+                    <input type="file" id="obFileCM" accept=".csv" data-expected-parts='["Obligation", "CM_EquityT1_CM"]' onchange="validateFile('obFileCM')">
+                </div>
+                <div class="file-input-group" id="group-sdFileCM">
+                    <div class="progress-fill"></div>
+                    <label for="sdFileCM">2. Cash Stampduty <span class="success-icon" id="icon-sdFileCM" style="display:none;"></span></label>
+                    <input type="file" id="sdFileCM" accept=".csv" data-expected-parts='["StampDuty", "CM_0_CM"]' onchange="validateFile('sdFileCM')">
+                </div>
+                <div class="file-input-group" id="group-sttFileCM">
+                    <div class="progress-fill"></div>
+                    <label for="sttFileCM">3. Cash STT <span class="success-icon" id="icon-sttFileCM" style="display:none;"></span></label>
+                    <input type="file" id="sttFileCM" accept=".csv" data-expected-parts='["STT", "CM_0_CM"]' onchange="validateFile('sttFileCM')">
+                </div>
+            </div>
+
+            <div class="file-section">
+                <h2>F&O Files</h2>
+                <div class="file-input-group" id="group-posFileFO">
+                    <div class="progress-fill"></div>
+                    <label for="posFileFO">1. Position <span class="success-icon" id="icon-posFileFO" style="display:none;"></span></label>
+                    <input type="file" id="posFileFO" accept=".csv" data-expected-parts='["Position", "FO_0_CM"]' onchange="validateFile('posFileFO')">
+                </div>
+                <div class="file-input-group" id="group-sdFileFO">
+                    <div class="progress-fill"></div>
+                    <label for="sdFileFO">2. F&O Stamp Duty <span class="success-icon" id="icon-sdFileFO" style="display:none;"></span></label>
+                    <input type="file" id="sdFileFO" accept=".csv" data-expected-parts='["StampDuty", "FO_0_CM"]' onchange="validateFile('sdFileFO')">
+                </div>
+                <div class="file-input-group" id="group-sttFileFO">
+                    <div class="progress-fill"></div>
+                    <label for="sttFileFO">3. F&O STT <span class="success-icon" id="icon-sttFileFO" style="display:none;"></span></label>
+                    <input type="file" id="sttFileFO" accept=".csv" data-expected-parts='["STT", "FO_0_CM"]' onchange="validateFile('sttFileFO')">
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <button class="generate-button" id="generateButton" onclick="processAllFiles()">Generate Full Summary</button>
+        </div>
+    </div>
+    
+    <div class="control-group">
+        <button class="download-button" id="downloadButton" style="display:none;" onclick="downloadCSV(window.combinedSummary, document.getElementById('reportDate').value)">⬇️ Download Summary(CSV)</button>
+    </div>
+
+
+    <div id="status" class="error-message smooth-transition hidden-section"></div>
+    
+    <div id="summaryOutput" class="smooth-transition hidden-section">
+        </div>
+</div>
+
+<script>
+    // Column Indices (A=0, B=1, C=2, etc.)
+    const COL_CM = {
+        OB_BROKER_ID: 3, OB_SELL_AMT: 25, OB_BUY_AMT: 26, SD_BROKER_ID: 6, SD_CLIENT_ID: 9, SD_AMOUNT: 32, STT_BROKER_ID: 9, STT_CLIENT_ID: 10, STT_AMOUNT: 43
+    };
+    const COL_FO = {
+        POS_BROKER_ID: 6, POS_COL_AL: 37, POS_COL_AM: 38, POS_COL_AN: 39, POS_COL_AO: 40, 
+        
+        // F&O Stamp Duty Columns (RptHdr 40)
+        SD_BROKER_ID: 6,      // Column G
+        SD_TICKER: 11,        // Column L (TckrSymb)
+        SD_AMOUNT: 32,        // Column AG (StmpDtyAmt)
+        
+        // F&O STT Columns (RptHdr 40)
+        STT_BROKER_ID: 9,     // Column J
+        STT_TICKER: 11,       // Column L (TckrSymb)
+        STT_AMOUNT: 43        // Column AR (TtlTaxs)
+    };
+
+    // Global variable to hold the combined summary data for CSV download
+    window.combinedSummary = {};
+
+    // DOM Elements for control
+    const inputSection = document.getElementById('inputSection');
+    const summaryOutput = document.getElementById('summaryOutput');
+    const statusDiv = document.getElementById('status');
+    const downloadBtn = document.getElementById('downloadButton');
+    const generateBtn = document.getElementById('generateButton');
+    const dateContainer = document.getElementById('dateContainer'); 
+
+
+    // Helper function for Indian number formatting
+    function formatIndianRupees(num) {
+        if (typeof num !== 'number') return "0.00";
+        const isNegative = num < 0;
+        const absNum = Math.abs(num);
+        
+        const parts = absNum.toFixed(2).toString().split('.');
+        let integerPart = parts[0];
+        let lastThree = integerPart.substring(integerPart.length - 3);
+        let otherNumbers = integerPart.substring(0, integerPart.length - 3);
+        
+        if (otherNumbers !== '')
+            lastThree = ',' + lastThree;
+        let res = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree;
+        
+        // Add decimal part
+        res = res + (parts.length > 1 ? "." + parts[1] : ".00");
+        
+        return isNegative ? "-" + res : res;
+    }
+
+    // --- UI Transition Logic ---
+    function hideInputShowSummary() {
+        inputSection.classList.add('hidden-section');
+        // Wait for the fade out to complete before showing summary, preventing jump
+        setTimeout(() => {
+            summaryOutput.classList.remove('hidden-section');
+            statusDiv.classList.remove('hidden-section');
+        }, 500); 
+    }
+
+    function resetUIOnDateChange() {
+        // Clear date error highlight
+        dateContainer.classList.remove('error-highlight');
+        statusDiv.classList.remove('date-error-message');
+        
+        // Reset summary and status
+        summaryOutput.innerHTML = '';
+        downloadBtn.style.display = 'none'; 
+        
+        // Hide status/summary and show input section
+        statusDiv.classList.add('hidden-section');
+        summaryOutput.classList.add('hidden-section');
+        
+        // Remove success class from file boxes and reset input section
+        document.querySelectorAll('.file-input-group').forEach(group => {
+            const inputId = group.id.replace('group-', '');
+            const successIcon = document.getElementById(`icon-${inputId}`);
+
+            group.classList.remove('upload-success');
+            group.classList.remove('shake-error'); 
+            group.style.borderColor = 'var(--border-color)';
+            const fill = group.querySelector('.progress-fill');
+            if (fill) fill.style.width = '0%'; 
+            const error = group.querySelector('.validation-error');
+            if(error) error.remove();
+            if(successIcon) successIcon.style.display = 'none'; // Hide success icon
+        });
+        
+        // Show input section smoothly
+        inputSection.classList.remove('hidden-section');
+        
+        // Clear all file inputs and status message
+        document.querySelectorAll('input[type="file"]').forEach(input => input.value = null);
+        statusDiv.textContent = '';
+        window.combinedSummary = {};
+    }
+
+
+    // --- Validation Logic ---
+    function formatSelectedDate(dateString) {
+        if (!dateString) return null;
+        return dateString.replace(/-/g, ''); 
+    }
+
+    function extractDateFromFilename(fileName) {
+        const match = fileName.match(/_(\d{8})_F_/);
+        return match ? match[1] : null;
+    }
+
+    function validateFile(inputId) {
+        const input = document.getElementById(inputId);
+        const file = input.files[0];
+        const groupDiv = document.getElementById(`group-${inputId}`);
+        const fill = groupDiv.querySelector('.progress-fill');
+        const successIcon = document.getElementById(`icon-${inputId}`);
+        const reportDate = document.getElementById('reportDate').value;
+        
+        // 1. Reset file-specific styles
+        groupDiv.classList.remove('upload-success');
+        groupDiv.classList.remove('shake-error');
+        groupDiv.style.borderColor = 'var(--border-color)';
+        if (fill) fill.style.width = '0%';
+        if(successIcon) successIcon.style.display = 'none'; 
+        
+        const oldError = groupDiv.querySelector('.validation-error');
+        if (oldError) oldError.remove();
+        
+        // Clear previous date error display
+        dateContainer.classList.remove('error-highlight');
+        statusDiv.classList.remove('date-error-message');
+        statusDiv.classList.add('hidden-section');
+
+
+        if (!file) {
+            groupDiv.style.borderColor = 'var(--border-color)';
+            return;
+        }
+        
+        // 2. Check for Date Selection FIRST
+        if (!reportDate) {
+            // Highlight the date box and show error status
+            dateContainer.classList.add('error-highlight');
+            statusDiv.textContent = '⚠️ Please select the Report Date first.';
+            statusDiv.classList.remove('hidden-section');
+            statusDiv.classList.add('date-error-message');
+            
+            // Immediately reset the file input that triggered this error
+            input.value = null; 
+            return;
+        }
+        
+        // If date is present, proceed with file name and date validation
+        const fileName = file.name;
+        const expectedParts = JSON.parse(input.getAttribute('data-expected-parts'));
+
+        const expectedDate = formatSelectedDate(reportDate);
+        const fileDate = extractDateFromFilename(fileName);
+
+        let isValid = true;
+
+        // 2.1. Check File Name Parts
+        if (!expectedParts.every(part => fileName.includes(part))) {
+            isValid = false;
+        }
+
+        // 2.2. Check Date Match
+        if (isValid && (fileDate !== expectedDate)) {
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            // Shake Effect and Error State for wrong file
+            groupDiv.classList.add('shake-error');
+            groupDiv.style.borderColor = 'var(--danger-color)';
+            if (fill) fill.style.width = '0%'; 
+            
+            const errorSpan = document.createElement('span');
+            errorSpan.className = 'validation-error';
+            errorSpan.textContent = `❌ WRONG FILE`;
+            groupDiv.appendChild(errorSpan);
+            input.value = null; 
+            
+            // Show status message for wrong file (not date error)
+            statusDiv.textContent = 'Error: One or more files failed validation.';
+            statusDiv.classList.remove('hidden-section');
+        } else {
+             // File is valid, start fill animation
+            if (fill) {
+                void fill.offsetWidth; 
+                fill.style.width = '100%'; 
+            }
+             // Set success class and show icon after animation is visually done (0.8s in CSS)
+             setTimeout(() => {
+                groupDiv.classList.add('upload-success');
+                if(successIcon) successIcon.style.display = 'inline'; // Show success icon
+             }, 800);
+            
+            // If all 6 files are now uploaded and valid, clear the status message
+            const allFilesUploaded = Array.from(document.querySelectorAll('input[type="file"]')).every(i => i.files[0] && !document.getElementById(`group-${i.id}`).querySelector('.validation-error'));
+            if (allFilesUploaded) {
+                 statusDiv.classList.add('hidden-section');
+            }
+        }
+    }
+    
+    // --- Core Parsing Function ---
+    function parseFile(file) {
+        return new Promise((resolve, reject) => {
+            if (!file) return reject("File not selected.");
+            Papa.parse(file, {
+                header: false, skipEmptyLines: true,
+                complete: (results) => resolve(results.data),
+                error: (error) => reject(`Error parsing file: ${error.message}`)
+            });
+        });
+    }
+
+    // --- CSV Download Logic ---
+    function downloadCSV(combinedSummary, reportDate) {
+        if (Object.keys(combinedSummary).length === 0) {
+            alert("No summary data found to download. Please generate the summary first.");
+            return;
+        }
+
+        const dateParts = reportDate.split('-'); // YYYY-MM-DD
+        const ddmmyyyy = `${dateParts[2]}${dateParts[1]}${dateParts[0]}`;
+        const filename = `CM payin payout ${ddmmyyyy}.csv`;
+
+        let csv = "TM CODE,CM Obligation,CM Stamp Duty,CM STT,FO TOTAL,FO Stamp Duty,FO STT\r\n";
+        
+        const brokerIds = Object.keys(combinedSummary).sort();
+        let totalCMMV = 0, totalCMSD = 0, totalCMSTT = 0;
+        let totalFOMV = 0, totalFOSD = 0, totalFOSTT = 0;
+
+
+        brokerIds.forEach(id => {
+            const data = combinedSummary[id];
+            
+            const cmMainVal = data.cmMainValue.toFixed(2);
+            const cmSD = data.cmStampDuty.toFixed(2);
+            const cmSTT = data.cmStt.toFixed(2);
+            const foMainVal = data.foMainValue.toFixed(2);
+            const foSD = data.foStampDuty.toFixed(2);
+            const foSTT = data.foStt.toFixed(2);
+
+            csv += `${id},${cmMainVal},${cmSD},${cmSTT},${foMainVal},${foSD},${foSTT}\r\n`;
+
+            totalCMMV += data.cmMainValue;
+            totalCMSD += data.cmStampDuty;
+            totalCMSTT += data.cmStt;
+            totalFOMV += data.foMainValue;
+            totalFOSD += data.foStampDuty;
+            totalFOSTT += data.foStt;
+        });
+        
+        // Add Total Row
+        csv += `Total,${totalCMMV.toFixed(2)},${totalCMSD.toFixed(2)},${totalCMSTT.toFixed(2)},${totalFOMV.toFixed(2)},${totalFOSD.toFixed(2)},${totalFOSTT.toFixed(2)}\r\n`;
+
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        if (link.download !== undefined) { 
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+
+
+    // --- Main Processing Function (Updated Loading State) ---
+    async function processAllFiles() {
+        
+        // --- 1. Start Loading State ---
+        generateBtn.textContent = 'Processing...';
+        generateBtn.disabled = true;
+        statusDiv.textContent = 'Processing all files...';
+        statusDiv.classList.remove('date-error-message'); // Clear potential date error class
+        downloadBtn.style.display = 'none'; 
+        
+        const reportDate = document.getElementById('reportDate').value;
+        if (!reportDate) {
+            // Restore button state on error
+            generateBtn.textContent = 'Generate Full Summary';
+            generateBtn.disabled = false;
+            
+            // Apply date error styling
+            dateContainer.classList.add('error-highlight');
+            statusDiv.textContent = '⚠️ Error: Please select the Report Date.';
+            statusDiv.classList.remove('hidden-section');
+            statusDiv.classList.add('date-error-message');
+            document.getElementById('reportDate').focus();
+            return;
+        }
+        dateContainer.classList.remove('error-highlight'); // Clear highlight if date is selected
+
+        const fileInputs = ['obFileCM', 'sdFileCM', 'sttFileCM', 'posFileFO', 'sdFileFO', 'sttFileFO'];
+        const files = fileInputs.map(id => document.getElementById(id).files[0]);
+
+        if (files.some(f => !f)) {
+            // Restore button state on error
+            generateBtn.textContent = 'Generate Full Summary';
+            generateBtn.disabled = false;
+            statusDiv.textContent = 'Error: Please upload all 6 files.';
+            statusDiv.classList.remove('hidden-section');
+            return;
+        }
+        
+        let validationFailed = false;
+        fileInputs.forEach(id => {
+            // Re-run validation for final check, but don't reset files that passed
+            validateFile(id); 
+            if (document.getElementById(`group-${id}`).querySelector('.validation-error')) {
+                validationFailed = true;
+            }
+        });
+
+        if (validationFailed) {
+            // Restore button state on error
+            generateBtn.textContent = 'Generate Full Summary';
+            generateBtn.disabled = false;
+            statusDiv.textContent = 'Error: One or more files failed validation.';
+            statusDiv.classList.remove('hidden-section');
+            return;
+        }
+        
+        // Start UI Transition: Hide Input, prepare to show Summary
+        hideInputShowSummary();
+
+        try {
+            const [obDataCM, sdDataCM, sttDataCM, posDataFO, sdDataFO, sttDataFO] = await Promise.all(files.map(parseFile));
+
+            const summaryCM = processCASH(obDataCM, sdDataCM, sttDataCM);
+            const summaryFO = processFO(posDataFO, sdDataFO, sttDataFO);
+            
+            // --- Combine Summaries for CSV ---
+            const combinedSummary = {};
+            const allBrokerIds = new Set([...Object.keys(summaryCM), ...Object.keys(summaryFO)]);
+
+            allBrokerIds.forEach(brokerId => {
+                combinedSummary[brokerId] = {
+                    cmMainValue: summaryCM[brokerId] ? summaryCM[brokerId].mainValue : 0,
+                    cmStampDuty: summaryCM[brokerId] ? summaryCM[brokerId].stampDuty : 0,
+                    cmStt: summaryCM[brokerId] ? summaryCM[brokerId].stt : 0,
+                    foMainValue: summaryFO[brokerId] ? summaryFO[brokerId].mainValue : 0,
+                    foStampDuty: summaryFO[brokerId] ? summaryFO[brokerId].stampDuty : 0,
+                    foStt: summaryFO[brokerId] ? summaryFO[brokerId].stt : 0
+                };
+            });
+            window.combinedSummary = combinedSummary; // Update global variable
+
+
+            statusDiv.textContent = `Summary Generated successfully for date ${reportDate}.`;
+            
+            let outputHTML = `<h2>CASH Summary - Date: ${reportDate}</h2>`;
+            outputHTML += displaySummary(summaryCM, 'Obligation');
+            
+            outputHTML += `<h2>F&O Summary - Date: ${reportDate}</h2>`;
+            outputHTML += displaySummary(summaryFO, 'Position');
+
+            document.getElementById('summaryOutput').innerHTML = outputHTML;
+            
+            // Show download button
+            setTimeout(() => {
+                 downloadBtn.style.display = 'block'; 
+            }, 500);
+
+        } catch (error) {
+            statusDiv.textContent = `Error during processing: ${error}`;
+            console.error(error);
+            downloadBtn.style.display = 'none'; 
+        } finally {
+            // --- 2. End Loading State ---
+            generateBtn.textContent = 'Generate Full Summary';
+            generateBtn.disabled = false;
+        }
+    }
+
+
+    // --- CM Segment Logic (No change) ---
+    function processCASH(obData, sdData, sttData) {
+        const summary = {};
+        for (let i = 1; i < obData.length; i++) {
+            const row = obData[i];
+            const brokerId = row[COL_CM.OB_BROKER_ID];
+            const buyAmt = parseFloat(row[COL_CM.OB_BUY_AMT]) || 0;
+            const sellAmt = parseFloat(row[COL_CM.OB_SELL_AMT]) || 0;
+            if (!brokerId || row[0] !== 'CM') continue;
+            if (!summary[brokerId]) summary[brokerId] = { mainValue: 0, stampDuty: 0, stt: 0 };
+            summary[brokerId].mainValue += (buyAmt - sellAmt); 
+        }
+        const brokersWithObligation = Object.keys(summary);
+        for (let i = 1; i < sdData.length; i++) {
+            const row = sdData[i];
+            const brokerId = row[COL_CM.SD_BROKER_ID];
+            const clientId = row[COL_CM.SD_CLIENT_ID];
+            const sdAmt = parseFloat(row[COL_CM.SD_AMOUNT]) || 0;
+            // Only aggregate for rows where Client ID is blank (summary line, usually RptHdr 20/10)
+            if (brokersWithObligation.includes(brokerId) && clientId === '') { 
+                if (summary[brokerId]) summary[brokerId].stampDuty += sdAmt;
+            }
+        }
+        for (let i = 1; i < sttData.length; i++) {
+            const row = sttData[i];
+            const brokerId = row[COL_CM.STT_BROKER_ID];
+            const clientId = row[COL_CM.STT_CLIENT_ID];
+            const sttAmt = parseFloat(row[COL_CM.STT_AMOUNT]) || 0;
+            // Only aggregate for rows where Client ID is blank (summary line, usually RptHdr 20/10)
+            if (brokersWithObligation.includes(brokerId) && clientId === '') {
+                if (summary[brokerId]) summary[brokerId].stt += sttAmt;
+            }
+        }
+        return summary;
+    }
+
+
+    // --- F&O Segment Logic (UPDATED) ---
+    function processFO(posData, sdData, sttData) {
+        const summary = {};
+        
+        // 1. Process Position File (Main Value) - No Change
+        for (let i = 1; i < posData.length; i++) {
+            const row = posData[i];
+            const brokerId = row[COL_FO.POS_BROKER_ID];
+            const valAL = parseFloat(row[COL_FO.POS_COL_AL]) || 0;
+            const valAM = parseFloat(row[COL_FO.POS_COL_AM]) || 0;
+            const valAN = parseFloat(row[COL_FO.POS_COL_AN]) || 0;
+            const valAO = parseFloat(row[COL_FO.POS_COL_AO]) || 0;
+            if (!brokerId || row[0] !== 'FO') continue;
+            if (!summary[brokerId]) summary[brokerId] = { mainValue: 0, stampDuty: 0, stt: 0 };
+            summary[brokerId].mainValue += (valAL + valAM + valAN + valAO);
+        }
+        const brokersWithPosition = Object.keys(summary);
+
+        // 2. Process F&O Stamp Duty File (UPDATED LOGIC)
+        for (let i = 1; i < sdData.length; i++) {
+            const row = sdData[i];
+            const rptHdr = row[0];
+            const brokerId = row[COL_FO.SD_BROKER_ID];
+            const tickerSymb = row[COL_FO.SD_TICKER];
+            const sdAmt = parseFloat(row[COL_FO.SD_AMOUNT]) || 0;
+            
+            // New Logic: Only include if RptHdr is '40' AND TickerSymbol is NOT blank AND Broker ID is present
+            if (rptHdr === '40' && tickerSymb && brokerId && brokersWithPosition.includes(brokerId)) {
+                if (!summary[brokerId]) summary[brokerId] = { mainValue: 0, stampDuty: 0, stt: 0 }; // Should already exist from posData, but safe check
+                summary[brokerId].stampDuty += sdAmt; 
+            }
+        }
+
+        // 3. Process F&O STT File (UPDATED LOGIC)
+        for (let i = 1; i < sttData.length; i++) {
+            const row = sttData[i];
+            const rptHdr = row[0];
+            const brokerId = row[COL_FO.STT_BROKER_ID];
+            const tickerSymb = row[COL_FO.STT_TICKER];
+            const sttAmt = parseFloat(row[COL_FO.STT_AMOUNT]) || 0;
+
+             // New Logic: Only include if RptHdr is '40' AND TickerSymbol is NOT blank AND Broker ID is present
+            if (rptHdr === '40' && tickerSymb && brokerId && brokersWithPosition.includes(brokerId)) {
+                if (!summary[brokerId]) summary[brokerId] = { mainValue: 0, stampDuty: 0, stt: 0 }; // Should already exist from posData, but safe check
+                summary[brokerId].stt += sttAmt; 
+            }
+        }
+        return summary;
+    }
+
+
+    // --- Display Function (No change) ---
+    function displaySummary(summary, mainColumnName) {
+        let totalMainValue = 0;
+        let totalStampDuty = 0;
+        let totalSTT = 0;
+
+        let html = `
+            <table id="summaryTable">
+                <thead>
+                    <tr>
+                        <th class="tm-code">TM CODE</th>
+                        <th>${mainColumnName}</th>
+                        <th>Stamp Duty</th>
+                        <th>STT</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        const brokerIds = Object.keys(summary).sort();
+
+        brokerIds.forEach(id => {
+            const data = summary[id];
+            
+            const mainVal = data.mainValue;
+            const sd = data.stampDuty;
+            const stt = data.stt;
+
+            const mainValClass = mainVal >= 0 ? 'positive' : 'negative';
+
+            html += `
+                <tr>
+                    <td class="tm-code">${id}</td>
+                    <td><span class="${mainValClass}">${formatIndianRupees(mainVal)}</span></td>
+                    <td>${formatIndianRupees(sd)}</td>
+                    <td>${formatIndianRupees(stt)}</td>
+                </tr>
+            `;
+
+            totalMainValue += mainVal;
+            totalStampDuty += sd;
+            totalSTT += stt;
+        });
+        
+        const totalMainValClass = totalMainValue >= 0 ? 'positive' : 'negative';
+        html += `
+            <tr class="total-row">
+                <td class="tm-code">Total</td>
+                <td><span class="${totalMainValClass}">${formatIndianRupees(totalMainValue)}</span></td>
+                <td>${formatIndianRupees(totalStampDuty)}</td>
+                <td>${formatIndianRupees(totalSTT)}</td>
+            </tr>
+            </tbody>
+            </table>
+        `;
+        
+        return html;
+    }
+</script>
+</body>
+</html>
