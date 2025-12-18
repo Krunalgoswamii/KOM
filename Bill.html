@@ -283,6 +283,64 @@ letter-spacing: 0.5px;
             border-style: solid;
         }
         .validation-error { position: absolute; top: 5px; right: 15px; color: var(--danger-color); font-size: 12px; font-weight: 600; background-color: #FEF2F2; padding: 3px 6px; border-radius: 3px; z-index: 2; }
+    .switch-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background: #f1f5f9;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.ios-switch {
+    position: relative;
+    display: inline-block;
+    width: 54px;
+    height: 28px;
+}
+
+.ios-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #00b670; /* Green for Final */
+    transition: .4s;
+    border-radius: 34px;
+}
+
+/* Checkbox checked hone par bhi green hi rahega */
+input:checked + .slider {
+    background-color: #00b670; /* Green for Provisional */
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Switch ke side ka text style */
+.suffix-label-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+    
     </style>
 </head>
 <body>
@@ -298,27 +356,46 @@ letter-spacing: 0.5px;
         </div>
     </div>
     
-    <div id="inputSection" class="smooth-transition">
+    
+
+        <div id="inputSection" class="smooth-transition">
         <div class="file-upload-layout">
             
             <div class="file-section">
-                <h2>CASH Files</h2>
-                <div class="file-input-group" id="group-obFileCM">
-                    <div class="progress-fill"></div>
-                    <label for="obFileCM">1. Obligation <span class="success-icon" id="icon-obFileCM" style="display:none;"></span></label>
-                    <input type="file" id="obFileCM" accept=".csv" data-expected-parts='["Obligation", "CM_EquityT1_CM"]' onchange="validateFile('obFileCM')">
-                </div>
-                <div class="file-input-group" id="group-sdFileCM">
-                    <div class="progress-fill"></div>
-                    <label for="sdFileCM">2. Cash Stampduty <span class="success-icon" id="icon-sdFileCM" style="display:none;"></span></label>
-                    <input type="file" id="sdFileCM" accept=".csv" data-expected-parts='["StampDuty", "CM_0_CM"]' onchange="validateFile('sdFileCM')">
-                </div>
-                <div class="file-input-group" id="group-sttFileCM">
-                    <div class="progress-fill"></div>
-                    <label for="sttFileCM">3. Cash STT <span class="success-icon" id="icon-sttFileCM" style="display:none;"></span></label>
-                    <input type="file" id="sttFileCM" accept=".csv" data-expected-parts='["STT", "CM_0_CM"]' onchange="validateFile('sttFileCM')">
-                </div>
-            </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--accent-color); padding-bottom: 8px;">
+        <h2 style="margin: 0; border: none; font-size: 1.3em;">CASH Files</h2>
+        
+        <div style="display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 4px 10px; border-radius: 20px; border: 1px solid #e2e8f0;">
+            <span class="suffix-label-text">Final</span>
+            <label class="ios-switch" style="width: 45px; height: 22px;">
+                <input type="checkbox" id="suffixToggle" onchange="updateSuffixUI(); resetUIOnDateChange();">
+                <span class="slider" style="border-radius: 20px;"></span>
+                <style>
+                    /* Chote size ke liye slider adjustment */
+                    .ios-switch .slider:before { height: 16px; width: 16px; left: 3px; bottom: 3px; }
+                    input:checked + .slider:before { transform: translateX(23px); }
+                </style>
+            </label>
+            <span class="suffix-label-text">Provisional</span>
+        </div>
+    </div>
+
+    <div class="file-input-group" id="group-obFileCM">
+        <div class="progress-fill"></div>
+        <label for="obFileCM">1. Obligation <span class="success-icon" id="icon-obFileCM" style="display:none;"></span></label>
+        <input type="file" id="obFileCM" accept=".csv" data-expected-parts='["Obligation", "CM_EquityT1_CM"]' onchange="validateFile('obFileCM')">
+    </div>
+    <div class="file-input-group" id="group-sdFileCM">
+        <div class="progress-fill"></div>
+        <label for="sdFileCM">2. Cash Stampduty <span class="success-icon" id="icon-sdFileCM" style="display:none;"></span></label>
+        <input type="file" id="sdFileCM" accept=".csv" data-expected-parts='["StampDuty", "CM_0_CM"]' onchange="validateFile('sdFileCM')">
+    </div>
+    <div class="file-input-group" id="group-sttFileCM">
+        <div class="progress-fill"></div>
+        <label for="sttFileCM">3. Cash STT <span class="success-icon" id="icon-sttFileCM" style="display:none;"></span></label>
+        <input type="file" id="sttFileCM" accept=".csv" data-expected-parts='["STT", "CM_0_CM"]' onchange="validateFile('sttFileCM')">
+    </div>
+</div>
 
             <div class="file-section">
                 <h2>F&O Files</h2>
@@ -349,15 +426,48 @@ letter-spacing: 0.5px;
         <button class="download-button" id="downloadButton" style="display:none;" onclick="downloadCSV(window.combinedSummary, document.getElementById('reportDate').value)">⬇️ Download Summary(CSV)</button>
     </div>
 
-
     <div id="status" class="error-message smooth-transition hidden-section"></div>
     
-    <div id="summaryOutput" class="smooth-transition hidden-section">
-        </div>
+    <div id="summaryOutput" class="smooth-transition hidden-section"></div>
 </div>
 
 <script>
     // Column Indices (A=0, B=1, C=2, etc.)
+
+    function updateSuffixUI() {
+    const toggle = document.getElementById('suffixToggle');
+    // Agar toggle UNCHECKED hai (matlab user ne "Final" par click kiya hai)
+    if (!toggle.checked) {
+        resetCashFilesOnly();
+    }
+}
+
+// Sirf CASH segment ki files reset karne ke liye naya function
+function resetCashFilesOnly() {
+    const cashFilesIds = ['obFileCM', 'sdFileCM', 'sttFileCM'];
+    
+    cashFilesIds.forEach(id => {
+        const input = document.getElementById(id);
+        const groupDiv = document.getElementById(`group-${id}`);
+        const successIcon = document.getElementById(`icon-${id}`);
+        const fill = groupDiv.querySelector('.progress-fill');
+
+        // 1. Input value clear karein
+        input.value = null;
+
+        // 2. UI Reset karein (Green color aur icons hatao)
+        groupDiv.classList.remove('upload-success', 'shake-error');
+        groupDiv.style.borderColor = 'var(--border-color)';
+        if (fill) fill.style.width = '0%';
+        if (successIcon) successIcon.style.display = 'none';
+
+        // 3. Purane error messages hatao
+        const oldError = groupDiv.querySelector('.validation-error');
+        if (oldError) oldError.remove();
+    });
+
+    console.log("Cash files reset because Final mode was selected.");
+}
     const COL_CM = {
         OB_BROKER_ID: 3, OB_SELL_AMT: 25, OB_BUY_AMT: 26, SD_BROKER_ID: 6, SD_CLIENT_ID: 9, SD_AMOUNT: 32, STT_BROKER_ID: 9, STT_CLIENT_ID: 10, STT_AMOUNT: 43
     };
@@ -463,105 +573,98 @@ letter-spacing: 0.5px;
     }
 
     function extractDateFromFilename(fileName) {
-        const match = fileName.match(/_(\d{8})_F_/);
-        return match ? match[1] : null;
-    }
+    // Ye regex kisi bhi _YYYYMMDD_ ke baad ek letter (F ya P) ko match karega
+    const match = fileName.match(/_(\d{8})_[F|P]_/);
+    return match ? match[1] : null;
+}
 
     function validateFile(inputId) {
-        const input = document.getElementById(inputId);
-        const file = input.files[0];
-        const groupDiv = document.getElementById(`group-${inputId}`);
-        const fill = groupDiv.querySelector('.progress-fill');
-        const successIcon = document.getElementById(`icon-${inputId}`);
-        const reportDate = document.getElementById('reportDate').value;
-        
-        // 1. Reset file-specific styles
-        groupDiv.classList.remove('upload-success');
-        groupDiv.classList.remove('shake-error');
-        groupDiv.style.borderColor = 'var(--border-color)';
-        if (fill) fill.style.width = '0%';
-        if(successIcon) successIcon.style.display = 'none'; 
-        
-        const oldError = groupDiv.querySelector('.validation-error');
-        if (oldError) oldError.remove();
-        
-        // Clear previous date error display
-        dateContainer.classList.remove('error-highlight');
-        statusDiv.classList.remove('date-error-message');
-        statusDiv.classList.add('hidden-section');
+    const input = document.getElementById(inputId);
+    const file = input.files[0];
+    const groupDiv = document.getElementById(`group-${inputId}`);
+    const fill = groupDiv.querySelector('.progress-fill');
+    const successIcon = document.getElementById(`icon-${inputId}`);
+    const reportDate = document.getElementById('reportDate').value;
+    
+    // Reset states
+    groupDiv.classList.remove('upload-success', 'shake-error');
+    groupDiv.style.borderColor = 'var(--border-color)';
+    if (fill) fill.style.width = '0%';
+    if(successIcon) successIcon.style.display = 'none'; 
+    const oldError = groupDiv.querySelector('.validation-error');
+    if (oldError) oldError.remove();
 
+    if (!file) return;
 
-        if (!file) {
-            groupDiv.style.borderColor = 'var(--border-color)';
-            return;
-        }
-        
-        // 2. Check for Date Selection FIRST
-        if (!reportDate) {
-            // Highlight the date box and show error status
-            dateContainer.classList.add('error-highlight');
-            statusDiv.textContent = '⚠️ Please select the Report Date first.';
-            statusDiv.classList.remove('hidden-section');
-            statusDiv.classList.add('date-error-message');
-            
-            // Immediately reset the file input that triggered this error
-            input.value = null; 
-            return;
-        }
-        
-        // If date is present, proceed with file name and date validation
-        const fileName = file.name;
-        const expectedParts = JSON.parse(input.getAttribute('data-expected-parts'));
+    // 1. Date Check
+    if (!reportDate) {
+        dateContainer.classList.add('error-highlight');
+        statusDiv.textContent = '⚠️ Please select the Report Date first.';
+        statusDiv.classList.remove('hidden-section');
+        statusDiv.classList.add('date-error-message');
+        input.value = null; 
+        return;
+    }
+    const handleModeChange = (newMode) => {
+  if (newMode === "final") {
+    setCashFiles([]); // State turant empty set kar di
+  }
+  setMode(newMode);
+};
 
-        const expectedDate = formatSelectedDate(reportDate);
-        const fileDate = extractDateFromFilename(fileName);
+    const fileName = file.name;
+    const expectedDate = formatSelectedDate(reportDate);
+    const fileDate = extractDateFromFilename(fileName);
+    const expectedParts = JSON.parse(input.getAttribute('data-expected-parts'));
+    
+    // --- NEW STRICT VALIDATION LOGIC ---
+    let isValid = true;
 
-        let isValid = true;
+    // Check 1: Filename basic parts (Obligation, CM etc.)
+    if (!expectedParts.every(part => fileName.includes(part))) {
+        isValid = false;
+    }
 
-        // 2.1. Check File Name Parts
-        if (!expectedParts.every(part => fileName.includes(part))) {
+    // Check 2: Date Match
+    if (fileDate !== expectedDate) {
+        isValid = false;
+    }
+
+    // Check 3: Suffix Match (F vs P)
+    if (inputId.includes('CM')) {
+        // Cash Segment: User choice ke hisab se check karega
+        const selectedSuffix = document.getElementById('suffixToggle').checked ? "P" : "F";
+        const requiredSuffixPattern = `_${expectedDate}_${selectedSuffix}_`;
+        if (!fileName.includes(requiredSuffixPattern)) {
             isValid = false;
         }
-
-        // 2.2. Check Date Match
-        if (isValid && (fileDate !== expectedDate)) {
+    } else {
+        // FO Segment: Hamesha _F_ honi chahiye
+        if (!fileName.includes(`_${expectedDate}_F_`)) {
             isValid = false;
-        }
-        
-        if (!isValid) {
-            // Shake Effect and Error State for wrong file
-            groupDiv.classList.add('shake-error');
-            groupDiv.style.borderColor = 'var(--danger-color)';
-            if (fill) fill.style.width = '0%'; 
-            
-            const errorSpan = document.createElement('span');
-            errorSpan.className = 'validation-error';
-            errorSpan.textContent = `❌ WRONG FILE`;
-            groupDiv.appendChild(errorSpan);
-            input.value = null; 
-            
-            // Show status message for wrong file (not date error)
-            statusDiv.textContent = 'Error: One or more files failed validation.';
-            statusDiv.classList.remove('hidden-section');
-        } else {
-             // File is valid, start fill animation
-            if (fill) {
-                void fill.offsetWidth; 
-                fill.style.width = '100%'; 
-            }
-             // Set success class and show icon after animation is visually done (0.8s in CSS)
-             setTimeout(() => {
-                groupDiv.classList.add('upload-success');
-                if(successIcon) successIcon.style.display = 'inline'; // Show success icon
-             }, 800);
-            
-            // If all 6 files are now uploaded and valid, clear the status message
-            const allFilesUploaded = Array.from(document.querySelectorAll('input[type="file"]')).every(i => i.files[0] && !document.getElementById(`group-${i.id}`).querySelector('.validation-error'));
-            if (allFilesUploaded) {
-                 statusDiv.classList.add('hidden-section');
-            }
         }
     }
+
+    // Result Action
+    if (!isValid) {
+        groupDiv.classList.add('shake-error');
+        groupDiv.style.borderColor = 'var(--danger-color)';
+        const errorSpan = document.createElement('span');
+        errorSpan.className = 'validation-error';
+        errorSpan.textContent = `❌ WRONG FILE`;
+        groupDiv.appendChild(errorSpan);
+        input.value = null; 
+    } else {
+        if (fill) {
+            void fill.offsetWidth; 
+            fill.style.width = '100%'; 
+        }
+        setTimeout(() => {
+            groupDiv.classList.add('upload-success');
+            if(successIcon) successIcon.style.display = 'inline';
+        }, 800);
+    }
+}
     
     // --- Core Parsing Function ---
     function parseFile(file) {
@@ -574,6 +677,24 @@ letter-spacing: 0.5px;
             });
         });
     }
+
+    function onSegmentChange(selectedMode) {
+    if (selectedMode === 'final') {
+        // 1. Cash files ki list reset karein (Data)
+        uploadedFilesArray = []; 
+
+        // 2. File Input field ko reset karein (UI)
+        const fileInput = document.getElementById('cashFileInput');
+        if (fileInput) {
+            fileInput.value = ""; 
+        }
+
+        // 3. UI par agar file names ki list dikh rahi hai toh use khali karein
+        document.getElementById('fileListView').innerHTML = "";
+        
+        console.log("Cash segment files reset because Final mode was selected.");
+    }
+}
 
     // --- CSV Download Logic ---
     function downloadCSV(combinedSummary, reportDate) {
@@ -633,111 +754,90 @@ letter-spacing: 0.5px;
 
     // --- Main Processing Function (Updated Loading State) ---
     async function processAllFiles() {
-        
-        // --- 1. Start Loading State ---
-        generateBtn.textContent = 'Processing...';
-        generateBtn.disabled = true;
-        statusDiv.textContent = 'Processing all files...';
-        statusDiv.classList.remove('date-error-message'); // Clear potential date error class
-        downloadBtn.style.display = 'none'; 
-        
-        const reportDate = document.getElementById('reportDate').value;
-        if (!reportDate) {
-            // Restore button state on error
-            generateBtn.textContent = 'Generate Full Summary';
-            generateBtn.disabled = false;
-            
-            // Apply date error styling
-            dateContainer.classList.add('error-highlight');
-            statusDiv.textContent = '⚠️ Error: Please select the Report Date.';
-            statusDiv.classList.remove('hidden-section');
-            statusDiv.classList.add('date-error-message');
-            document.getElementById('reportDate').focus();
-            return;
-        }
-        dateContainer.classList.remove('error-highlight'); // Clear highlight if date is selected
-
-        const fileInputs = ['obFileCM', 'sdFileCM', 'sttFileCM', 'posFileFO', 'sdFileFO', 'sttFileFO'];
-        const files = fileInputs.map(id => document.getElementById(id).files[0]);
-
-        if (files.some(f => !f)) {
-            // Restore button state on error
-            generateBtn.textContent = 'Generate Full Summary';
-            generateBtn.disabled = false;
-            statusDiv.textContent = 'Error: Please upload all 6 files.';
-            statusDiv.classList.remove('hidden-section');
-            return;
-        }
-        
-        let validationFailed = false;
-        fileInputs.forEach(id => {
-            // Re-run validation for final check, but don't reset files that passed
-            validateFile(id); 
-            if (document.getElementById(`group-${id}`).querySelector('.validation-error')) {
-                validationFailed = true;
-            }
-        });
-
-        if (validationFailed) {
-            // Restore button state on error
-            generateBtn.textContent = 'Generate Full Summary';
-            generateBtn.disabled = false;
-            statusDiv.textContent = 'Error: One or more files failed validation.';
-            statusDiv.classList.remove('hidden-section');
-            return;
-        }
-        
-        // Start UI Transition: Hide Input, prepare to show Summary
-        hideInputShowSummary();
-
-        try {
-            const [obDataCM, sdDataCM, sttDataCM, posDataFO, sdDataFO, sttDataFO] = await Promise.all(files.map(parseFile));
-
-            const summaryCM = processCASH(obDataCM, sdDataCM, sttDataCM);
-            const summaryFO = processFO(posDataFO, sdDataFO, sttDataFO);
-            
-            // --- Combine Summaries for CSV ---
-            const combinedSummary = {};
-            const allBrokerIds = new Set([...Object.keys(summaryCM), ...Object.keys(summaryFO)]);
-
-            allBrokerIds.forEach(brokerId => {
-                combinedSummary[brokerId] = {
-                    cmMainValue: summaryCM[brokerId] ? summaryCM[brokerId].mainValue : 0,
-                    cmStampDuty: summaryCM[brokerId] ? summaryCM[brokerId].stampDuty : 0,
-                    cmStt: summaryCM[brokerId] ? summaryCM[brokerId].stt : 0,
-                    foMainValue: summaryFO[brokerId] ? summaryFO[brokerId].mainValue : 0,
-                    foStampDuty: summaryFO[brokerId] ? summaryFO[brokerId].stampDuty : 0,
-                    foStt: summaryFO[brokerId] ? summaryFO[brokerId].stt : 0
-                };
-            });
-            window.combinedSummary = combinedSummary; // Update global variable
-
-
-            statusDiv.textContent = `Summary Generated successfully for date ${reportDate}.`;
-            
-            let outputHTML = `<h2>CASH Summary - Date: ${reportDate}</h2>`;
-            outputHTML += displaySummary(summaryCM, 'Obligation');
-            
-            outputHTML += `<h2>F&O Summary - Date: ${reportDate}</h2>`;
-            outputHTML += displaySummary(summaryFO, 'Position');
-
-            document.getElementById('summaryOutput').innerHTML = outputHTML;
-            
-            // Show download button
-            setTimeout(() => {
-                 downloadBtn.style.display = 'block'; 
-            }, 500);
-
-        } catch (error) {
-            statusDiv.textContent = `Error during processing: ${error}`;
-            console.error(error);
-            downloadBtn.style.display = 'none'; 
-        } finally {
-            // --- 2. End Loading State ---
-            generateBtn.textContent = 'Generate Full Summary';
-            generateBtn.disabled = false;
-        }
+    generateBtn.textContent = 'Processing...';
+    generateBtn.disabled = true;
+    
+    const reportDate = document.getElementById('reportDate').value;
+    if (!reportDate) {
+        generateBtn.textContent = 'Generate Full Summary';
+        generateBtn.disabled = false;
+        statusDiv.textContent = '⚠️ Error: Please select the Report Date.';
+        statusDiv.classList.remove('hidden-section');
+        return;
     }
+
+    // Check availability of files
+    const cashFiles = ['obFileCM', 'sdFileCM', 'sttFileCM'].map(id => document.getElementById(id).files[0]);
+    const foFiles = ['posFileFO', 'sdFileFO', 'sttFileFO'].map(id => document.getElementById(id).files[0]);
+
+    const hasAllCash = cashFiles.every(f => f !== undefined);
+    const hasSomeCash = cashFiles.some(f => f !== undefined);
+    const hasAllFO = foFiles.every(f => f !== undefined);
+    const hasSomeFO = foFiles.some(f => f !== undefined);
+
+    // Logic: Agar segment ki ek bhi file di hai, toh us segment ki teeno honi chahiye
+    if ((hasSomeCash && !hasAllCash) || (hasSomeFO && !hasAllFO) || (!hasSomeCash && !hasSomeFO)) {
+        generateBtn.textContent = 'Generate Full Summary';
+        generateBtn.disabled = false;
+        statusDiv.textContent = '❌ Error: Please upload either all 3 CASH files, all 3 F&O files, or both sets.';
+        statusDiv.classList.remove('hidden-section');
+        return;
+    }
+
+    hideInputShowSummary();
+
+    try {
+        let summaryCM = {};
+        let summaryFO = {};
+
+        // Process CASH if all 3 files are present
+        if (hasAllCash) {
+            const data = await Promise.all(cashFiles.map(parseFile));
+            summaryCM = processCASH(data[0], data[1], data[2]);
+        }
+
+        // Process FO if all 3 files are present
+        if (hasAllFO) {
+            const data = await Promise.all(foFiles.map(parseFile));
+            summaryFO = processFO(data[0], data[1], data[2]);
+        }
+        
+        // Combine Summaries
+        const combinedSummary = {};
+        const allBrokerIds = new Set([...Object.keys(summaryCM), ...Object.keys(summaryFO)]);
+
+        allBrokerIds.forEach(brokerId => {
+            combinedSummary[brokerId] = {
+                cmMainValue: summaryCM[brokerId]?.mainValue || 0,
+                cmStampDuty: summaryCM[brokerId]?.stampDuty || 0,
+                cmStt: summaryCM[brokerId]?.stt || 0,
+                foMainValue: summaryFO[brokerId]?.mainValue || 0,
+                foStampDuty: summaryFO[brokerId]?.stampDuty || 0,
+                foStt: summaryFO[brokerId]?.stt || 0
+            };
+        });
+        window.combinedSummary = combinedSummary;
+
+        let outputHTML = "";
+        if (hasAllCash) {
+            outputHTML += `<h2>CASH Summary - Date: ${reportDate}</h2>` + displaySummary(summaryCM, 'Obligation');
+        }
+        if (hasAllFO) {
+            outputHTML += `<h2>F&O Summary - Date: ${reportDate}</h2>` + displaySummary(summaryFO, 'Position');
+        }
+
+        document.getElementById('summaryOutput').innerHTML = outputHTML;
+        statusDiv.textContent = `Summary Generated successfully.`;
+        setTimeout(() => { downloadBtn.style.display = 'block'; }, 500);
+
+    } catch (error) {
+        statusDiv.textContent = `Error: ${error}`;
+        console.error(error);
+    } finally {
+        generateBtn.textContent = 'Generate Full Summary';
+        generateBtn.disabled = false;
+    }
+}
 
 
     // --- CM Segment Logic (No change) ---
