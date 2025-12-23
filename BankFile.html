@@ -56,25 +56,23 @@
         }
 
         @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-8px); }
-    50% { transform: translateX(8px); }
-    75% { transform: translateX(-8px); }
-}
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            50% { transform: translateX(8px); }
+            75% { transform: translateX(-8px); }
+        }
 
-.shake-error {
-    animation: shake 0.4s ease-in-out;
-    border-color: #ef4444 !important; /* Red border */
-    background-color: #fef2f2 !important; /* Light red bg */
-}
+        .shake-error {
+            animation: shake 0.4s ease-in-out;
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+        }
 
-/* Error text styling */
-.error-text {
-    color: #ef4444 !important;
-    font-weight: 700 !important;
-}
+        .error-text {
+            color: #ef4444 !important;
+            font-weight: 700 !important;
+        }
 
-        /* Clickable Upload Box */
         .upload-box {
             background: #ffffff;
             border: 2px dashed var(--border-color);
@@ -106,12 +104,6 @@
             left: 0;
             opacity: 0;
             cursor: pointer;
-        }
-
-        .upload-icon {
-            font-size: 24px;
-            margin-bottom: 10px;
-            display: block;
         }
 
         .upload-label { 
@@ -168,6 +160,31 @@
         .stat-row:last-child { border-bottom: none; }
         .stat-label { font-weight: 500; color: #64748B; font-size: 14px; }
         .stat-value { font-weight: 700; color: var(--text-dark); font-size: 15px; }
+
+        /* NSPB Warning UI */
+        .nspb-warning {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #fee2e2;
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            display: none;
+        }
+        .nspb-title {
+            color: #b91c1c;
+            font-weight: 800;
+            font-size: 13px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .nspb-list {
+            color: #ef4444;
+            font-size: 13px;
+            font-weight: 700;
+            margin: 0;
+            padding-left: 20px;
+            list-style-type: square;
+        }
     </style>
 </head>
 <body>
@@ -203,66 +220,61 @@
             <span class="stat-label">IFSC Returns (CSV)</span>
             <span id="csvCount" class="stat-value" style="color: #059669;">0</span>
         </div>
+
+        <div id="nspbSection" class="nspb-warning">
+            <div class="nspb-title">⚠️ NSPB DETECTED & REMOVED (CLIENT CODES)</div>
+            <ul id="nspbClientList" class="nspb-list"></ul>
+        </div>
     </div>
 </div>
 
 <script>
     function updateFileName(input, boxId, labelId, nameId) {
-    const box = document.getElementById(boxId);
-    const nameSpan = document.getElementById(nameId);
-    const label = document.getElementById(labelId);
-    
-    // Reset previous errors
-    box.classList.remove('shake-error');
-    label.classList.remove('error-text');
+        const box = document.getElementById(boxId);
+        const nameSpan = document.getElementById(nameId);
+        const label = document.getElementById(labelId);
+        
+        box.classList.remove('shake-error');
+        label.classList.remove('error-text');
 
-    if (input.files.length > 0) {
-        const file = input.files[0];
-        const reader = new FileReader();
+        if (input.files.length > 0) {
+            const file = input.files[0];
+            const reader = new FileReader();
 
-        reader.onload = function(e) {
-            const content = e.target.result;
-            let isValid = false;
+            reader.onload = function(e) {
+                const content = e.target.result;
+                let isValid = false;
 
-            // Payout File Check (must have Account No)
-            if (input.id === 'payoutFile' && content.includes("923020039179306")) {
-                isValid = true;
-            } 
-            // Error File Check (must have ~)
-            else if (input.id === 'errorFile' && content.includes("~")) {
-                isValid = true;
-            }
+                if (input.id === 'payoutFile' && content.includes("923020039179306")) {
+                    isValid = true;
+                } else if (input.id === 'errorFile' && content.includes("~")) {
+                    isValid = true;
+                }
 
-            if (isValid) {
-                box.classList.add('has-file');
-                box.classList.remove('shake-error');
-                label.innerText = "File Selected";
-                label.classList.remove('error-text');
-                nameSpan.innerText = file.name;
-                nameSpan.style.display = "block";
-            } else {
-                // Wrong File Logic
-                box.classList.remove('has-file');
-                box.classList.add('shake-error'); // Trigger shake
-                label.innerText = "Wrong file format";
-                label.classList.add('error-text');
-                nameSpan.style.display = "none";
-                input.value = ""; // Clear the input
-            }
-        };
-        reader.readAsText(file);
+                if (isValid) {
+                    box.classList.add('has-file');
+                    label.innerText = "File Selected";
+                    nameSpan.innerText = file.name;
+                    nameSpan.style.display = "block";
+                } else {
+                    box.classList.add('shake-error');
+                    label.innerText = "Wrong file format";
+                    label.classList.add('error-text');
+                    input.value = "";
+                }
+            };
+            reader.readAsText(file);
+        }
     }
-}
 
-async function processFiles() {
-    const pInput = document.getElementById('payoutFile');
-    const eInput = document.getElementById('errorFile');
+    async function processFiles() {
+        const pInput = document.getElementById('payoutFile');
+        const eInput = document.getElementById('errorFile');
 
-    // Button click par check karega ki dono files hain ya nahi
-    if (!pInput.files[0] || !eInput.files[0]) {
-        alert("Please select both files correctly!");
-        return;
-    }
+        if (!pInput.files[0] || !eInput.files[0]) {
+            alert("Please select both files correctly!");
+            return;
+        }
 
         const pText = await pInput.files[0].text();
         const eText = await eInput.files[0].text();
@@ -283,6 +295,7 @@ async function processFiles() {
 
         let bankRows = [];
         let csvRows = [];
+        let nspbCodes = [];
         let totalAmt = 0;
 
         pLines.forEach((line, index) => {
@@ -290,6 +303,14 @@ async function processFiles() {
             const lineNo = (index + 1).toString();
             const error = errorMap[lineNo] || "";
             let cols = line.split(',');
+
+            // --- NSPB Check (Extracting Client Code from Column 4 / Index 3) ---
+            const ifscCode = cols[10] || "";
+            if (ifscCode.toUpperCase().includes("NSPB")) {
+                const clientCode = cols[3] || "Unknown Code";
+                if (!nspbCodes.includes(clientCode)) nspbCodes.push(clientCode);
+                return; // Remove from file
+            }
 
             if (error.includes("payable amount should be between")) return;
 
@@ -314,9 +335,20 @@ async function processFiles() {
             bankRows.push(processed);
         });
 
+        // UI Update
         document.getElementById('lineCount').innerText = bankRows.length;
         document.getElementById('totalAmt').innerText = "₹ " + totalAmt.toLocaleString('en-IN', {minimumFractionDigits: 2});
         document.getElementById('csvCount').innerText = csvRows.length;
+        
+        const nspbSection = document.getElementById('nspbSection');
+        const nspbList = document.getElementById('nspbClientList');
+        if (nspbCodes.length > 0) {
+            nspbSection.style.display = 'block';
+            nspbList.innerHTML = nspbCodes.map(code => `<li>${code}</li>`).join('');
+        } else {
+            nspbSection.style.display = 'none';
+        }
+
         document.getElementById('resultsCard').style.display = 'block';
 
         download(bankRows.join('\n'), `${bankRows.length}_${dStrDash}.txt`, 'text/plain');
