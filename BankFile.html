@@ -316,9 +316,23 @@
 
             if (error.includes("no such ifsc code")) {
                 const ifsc = cols[10] || "";
-                const cheque = Math.floor(100000 + Math.random() * 900000);
-                csvRows.push([dStrDots, cols[3]||"", `"Payout return due to Wrong IFSC-${ifsc}"`, cheque, cols[5]||"0", "BSE_CASH", "AXIS-79306", "R", "HO", "HO", cheque, " "].join(','));
-                return;
+const cheque = Math.floor(100000 + Math.random() * 900000);
+const rowData = [
+    `${dStrDots}`, 
+    `${cols[3] || ""}`, 
+    `Payout return due to Wrong IFSC-${ifsc}`, 
+    `${cheque}`, 
+    `${cols[5] || "0"}`, 
+    `BSE_CASH`, 
+    `AXIS-79306`, 
+    `R`, 
+    `HO`, 
+    `HO`, 
+    `${cheque}`, 
+    ` `
+];
+csvRows.push(rowData.join(','));
+return;
             }
 
             if (error.includes("beneficiary name validation") && cols[2]) {
@@ -351,18 +365,24 @@
 
         document.getElementById('resultsCard').style.display = 'block';
 
-        download(bankRows.join('\n'), `${bankRows.length}_${dStrDash}.txt`, 'text/plain');
-        if (csvRows.length > 0) download("\ufeff" + csvRows.join('\n'), `IFSC_Returns_${dStrDash}.csv`, 'text/csv');
+        download(bankRows.join('\r\n'), `${bankRows.length}_${dStrDash}.txt`, 'text/plain');
+        if (csvRows.length > 0) download(csvRows.join('\r\n'), `IFSC_Returns_${dStrDash}.csv`, 'text/csv');
     }
 
     function download(content, name, type) {
-        const blob = new Blob([content], { type: type });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = name;
-        a.click();
-    }
+    // UTF-8 BOM add kar rahe hain taaki software error na de
+    const blobContent = type === 'text/csv' ? ["\ufeff", content] : [content];
+    const blob = new Blob(blobContent, { type: type + ';charset=utf-8' });
+    
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); 
+    a.click();
+    document.body.removeChild(a);
+}
 </script>
 
 </body>
 </html>
+
