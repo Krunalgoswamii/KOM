@@ -255,6 +255,50 @@ letter-spacing: 0.5px;
         .input-card.complete .file-name-display {
              border-color: var(--accent-color);
         }
+		
+		.container::before {
+    content: "";
+    position: absolute;
+    inset: -2px; /* बॉक्स से 2px बाहर */
+    border-radius: 14px; /* Container radius (12px) + 2px */
+    
+    /* Gemini Colors */
+    background: linear-gradient(45deg, #4285f4, #db4437, #f4b400, #0f9d58, #4285f4, #db4437, #f4b400, #0f9d58); 
+    background-size: 400% 400%; 
+    
+    z-index: -1; /* कंटेंट के पीछे */
+    animation: geminiFlow 3s ease-in-out forwards;
+}
+
+/* 2. Glow Effect (धुंधली रोशनी) */
+.container::after {
+    content: "";
+    position: absolute;
+    inset: -5px; /* बॉर्डर से थोड़ा और बाहर */
+    border-radius: 16px;
+    
+    background: linear-gradient(45deg, #4285f4, #db4437, #f4b400, #0f9d58, #4285f4, #db4437, #f4b400, #0f9d58); 
+    background-size: 400% 400%;
+    
+    z-index: -2; /* सबसे पीछे */
+    filter: blur(10px); /* ग्लो इफेक्ट */
+    opacity: 0.7;
+    
+    animation: geminiFlow 2s ease-in-out forwards;
+}
+@keyframes geminiFlow {
+    0% {
+        background-position: 0% 50%;
+        opacity: 1; 
+    }
+    75% {
+        opacity: 1; /* 1.5 सेकंड तक पूरा दिखेगा */
+    }
+    100% {
+        background-position: 100% 50%;
+        opacity: 0; /* 2 सेकंड पर गायब */
+    }
+}	
     </style>
 </head>
 <body>
