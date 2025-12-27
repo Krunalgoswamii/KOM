@@ -100,6 +100,87 @@
             color: var(--text-light);
         }
 
+        .upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    background: #fff;
+    transition: all 0.3s ease;
+    position: relative; /* Animation ke liye zaroori */
+    overflow: hidden;
+}
+
+.upload-area:hover {
+    border-color: var(--accent-color);
+    background-color: #F0FDF4;
+}
+
+/* Input ko chupane ke liye */
+#csvFile {
+    display: none;
+}
+
+.upload-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.upload-text {
+    font-size: 14px;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+/* 2. Edge Effect Animation (Temporary) */
+.upload-area.animating::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 14px;
+    background: linear-gradient(45deg, #4285f4, #db4437, #f4b400, #0f9d58);
+    background-size: 400% 400%;
+    z-index: 1;
+    animation: geminiFlow 1s linear infinite;
+}
+
+/* White overlay inside to make it look like a border */
+.upload-area.animating::after {
+    content: "";
+    position: absolute;
+    inset: 3px; /* Border thickness */
+    background: #fff;
+    border-radius: 10px;
+    z-index: 2;
+}
+
+/* Ensure content stays on top of animation */
+.upload-content {
+    position: relative;
+    z-index: 3;
+}
+
+/* 3. Success Green State */
+.upload-area.success {
+    border: 2px solid #22c55e; /* Green Border */
+    background-color: #dcfce7; /* Light Green Background */
+    animation: flashGreen 0.4s ease-out forwards;
+}
+
+.upload-area.success .upload-text {
+    color: #15803d;
+    font-weight: 700;
+}
+
+/* Chotu sa flash animation */
+@keyframes flashGreen {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.97); } /* Thoda chota hoga */
+    100% { transform: scale(1); }
+}
+
         /* Input Styling inspired by reference */
         input[type="number"], 
         select, 
@@ -254,6 +335,64 @@ color: #64748B; /* Thoda greyish color taaki premium lage */
 font-family: 'Inter', sans-serif;
 letter-spacing: 0.5px;
 }
+
+.summary-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            text-align: center;
+        }
+        .summary-item {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+        }
+        .summary-label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .summary-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .val-red { color: #EF4444; } /* Old Brokerage Color */
+        .val-blue { color: #3B82F6; } /* New Brokerage Color */
+        .val-green { color: #00b670; } /* Reversal Color */
+
+.btn-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+button { 
+    padding: 14px; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-size: 15px; 
+    font-weight: 600; 
+    width: 100%; 
+    transition: all 0.2s; 
+    flex: 1; /* Dono buttons barabar size ke honge */
+}
+
+/* White button with border */
+button.outline-btn {
+    background-color: #fff;
+    color: var(--accent-color);
+    border: 2px solid var(--accent-color);
+}
+button.outline-btn:hover {
+    background-color: #F0FDF4;
+}
+
+
     </style>
 </head>
 <body>
@@ -264,10 +403,15 @@ letter-spacing: 0.5px;
 	<div class="author-credit">By : Krunal Goswami</div>
     
     <div class="section">
-        <h3>1. Upload Data</h3>
-        <p class="info-text">Select your brokerage CSV file to begin.</p>
-        <input type="file" id="csvFile" accept=".csv" onchange="handleFileSelect()">
+    <h3>1. Upload CSV File</h3>
+    <div class="upload-area" id="dropZone" onclick="document.getElementById('csvFile').click()">
+        <div class="upload-content">
+            <span class="upload-icon">📂</span>
+            <span class="upload-text" id="uploadMsg"></span>
+            <input type="file" id="csvFile" accept=".csv" onchange="handleFileSelect()">
+        </div>
     </div>
+</div>
 
     <div class="section">
         <h3>2. Brokerage Settings</h3>
@@ -277,8 +421,8 @@ letter-spacing: 0.5px;
                 <h4 style="color: #EF4444;">OLD Brokerage</h4>
                 
                 <label>Future (%):</label>
-                <input type="number" id="oldFutVal" placeholder="0.03" step="0.0001">
-                <small>Based on Future Turnover</small>
+                <input type="number" id="oldFutVal" placeholder="" step="0.0001">
+                
 
                 <label>Option Type:</label>
                 <select id="oldOptType">
@@ -287,23 +431,23 @@ letter-spacing: 0.5px;
                 </select>
 
                 <label>Option Value:</label>
-                <input type="number" id="oldOptVal" placeholder="20" step="0.0001">
+                <input type="number" id="oldOptVal" placeholder="" step="0.0001">
             </div>
 
             <div class="col new-module">
                 <h4 style="color: #3B82F6;">NEW Brokerage</h4>
                 
                 <label>Future (%):</label>
-                <input type="number" id="newFutVal" placeholder="0.01" step="0.0001">
+                <input type="number" id="newFutVal" placeholder="" step="0.0001">
 
                 <label>Option Type:</label>
                 <select id="newOptType">
-                    <option value="lot">Per Lot (Flat)</option>
                     <option value="percent">Percentage (%)</option>
+                    <option value="lot">Per Lot (Flat)</option>
                 </select>
 
                 <label>Option Value:</label>
-                <input type="number" id="newOptVal" placeholder="10" step="0.0001">
+                <input type="number" id="newOptVal" placeholder="" step="0.0001">
             </div>
         </div>
     </div>
@@ -319,15 +463,20 @@ letter-spacing: 0.5px;
         </div>
     </div>
 
-    <button class="primary-btn" onclick="calculateAndDownload()">Calculate & Download File</button>
+    <div class="btn-group">
+    <button class="outline-btn" onclick="calculateData('view')">Calculate</button>
+    <button class="primary-btn" onclick="calculateData('download')">Download</button>
+</div>
 
     <div id="output"></div>
 </div>
 
 <script>
-    // Known Standard Lot Sizes
+
+    let lastState = "";
+    let cachedResult = null;
     const KNOWN_LOTS = {
-        "NIFTY": 75, "BANKNIFTY": 35, "FINNIFTY": 65, 
+        "NIFTY": 75, "BANKNIFTY": 30, "FINNIFTY": 65, 
         "MIDCPNIFTY": 140, "SENSEX": 20, "BANKEX": 30
     };
 
@@ -339,9 +488,12 @@ letter-spacing: 0.5px;
         return rows.map(row => row.split(','));
     }
 
+    // --- YE HAI MAIN MAGIC FUNCTION ---
     function handleFileSelect() {
         const fileInput = document.getElementById('csvFile');
         const container = document.getElementById('scripContainer');
+        const dropZone = document.getElementById('dropZone');
+        const uploadMsg = document.getElementById('uploadMsg');
         
         if (!fileInput.files.length) return;
 
@@ -356,55 +508,102 @@ letter-spacing: 0.5px;
                 alert("File is empty or invalid format.");
                 return;
             }
-
-            fileHeaders = data[0].map(h => h.trim());
-            fileData = data;
-
-            const idxScrip = fileHeaders.indexOf('SCRIP NAME');
             
-            if (idxScrip === -1) {
-                container.innerHTML = `<div style="color:red; text-align:center;">Error: 'SCRIP NAME' column not found.</div>`;
-                return;
-            }
-
-            const uniqueScrips = new Set();
-            for (let i = 1; i < data.length; i++) {
-                if (data[i].length > idxScrip) {
-                    let scrip = data[i][idxScrip].trim().toUpperCase();
-                    if (scrip) uniqueScrips.add(scrip);
-                }
-            }
-
-            container.innerHTML = "";
+            // 1. Animation Shuru (Rainbow Border)
+            dropZone.classList.add('animating');
+            uploadMsg.innerText = "Verifying File...";
             
-            if (uniqueScrips.size === 0) {
-                container.innerHTML = "<div style='text-align:center; color:#64748B'>No Scrips found in file.</div>";
-                return;
-            }
-
-            uniqueScrips.forEach(scrip => {
-                const isKnown = KNOWN_LOTS.hasOwnProperty(scrip);
-                const defaultVal = isKnown ? KNOWN_LOTS[scrip] : "";
-                const boxClass = isKnown ? "scrip-box" : "scrip-box unknown";
+            // 2. 1 Second ka wait
+            setTimeout(() => {
+                // Animation band
+                dropZone.classList.remove('animating');
                 
-                const html = `
-                    <div class="${boxClass}">
-                        <label class="scrip-label">${scrip}</label>
-                        <input type="number" class="lot-input" data-scrip="${scrip}" value="${defaultVal}" placeholder="Size">
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', html);
-            });
+                // Green Box ON
+                dropZone.classList.add('success');
+                uploadMsg.innerText = `✅ File Uploaded: ${file.name}`;
+                
+                // 3. Data Process karo
+                processFileContent(data, container);
+                
+            }, 1000); // 1000ms = 1 second
         };
 
         reader.readAsText(file);
     }
 
-    function calculateAndDownload() {
+    function processFileContent(data, container) {
+        fileHeaders = data[0].map(h => h.trim());
+        fileData = data;
+
+        const idxScrip = fileHeaders.indexOf('SCRIP NAME');
+        
+        if (idxScrip === -1) {
+            container.innerHTML = `<div style="color:red; text-align:center;">Error: 'SCRIP NAME' column not found.</div>`;
+            return;
+        }
+
+        const uniqueScrips = new Set();
+        for (let i = 1; i < data.length; i++) {
+            if (data[i].length > idxScrip) {
+                let scrip = data[i][idxScrip].trim().toUpperCase();
+                if (scrip) uniqueScrips.add(scrip);
+            }
+        }
+
+        container.innerHTML = "";
+        
+        if (uniqueScrips.size === 0) {
+            container.innerHTML = "<div style='text-align:center; color:#64748B'>No Scrips found in file.</div>";
+            return;
+        }
+
+        uniqueScrips.forEach(scrip => {
+            const isKnown = KNOWN_LOTS.hasOwnProperty(scrip);
+            const defaultVal = isKnown ? KNOWN_LOTS[scrip] : "";
+            const boxClass = isKnown ? "scrip-box" : "scrip-box unknown";
+            
+            const html = `
+                <div class="${boxClass}">
+                    <label class="scrip-label">${scrip}</label>
+                    <input type="number" class="lot-input" data-scrip="${scrip}" value="${defaultVal}" placeholder="Size">
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        });
+    }
+
+    function calculateData(mode) {
         if (!fileData.length) {
             alert("Please upload a CSV file first.");
             return;
         }
+
+        // 1. Current Values check karte hain
+        const inputsToCheck = [
+            document.getElementById('oldFutVal').value,
+            document.getElementById('oldOptType').value,
+            document.getElementById('oldOptVal').value,
+            document.getElementById('newFutVal').value,
+            document.getElementById('newOptType').value,
+            document.getElementById('newOptVal').value,
+            fileData.length // File same hai ya nahi check karne ke liye
+        ];
+        
+        // Lot sizes bhi check list me daal dete hain
+        document.querySelectorAll('.lot-input').forEach(inp => inputsToCheck.push(inp.value));
+
+        // Iska ek "Fingerprint" bana lete hain
+        const currentState = JSON.stringify(inputsToCheck);
+
+        // MAGIC LOGIC: Agar sab kuch pichli baar jaisa hi hai
+        if (currentState === lastState && cachedResult) {
+            if (mode === 'download') {
+                downloadCSV(cachedResult, "Brokerage_Reversal_Calculated.csv");
+            }
+            return; // YAHIN RUK JAO - Dobara calculate mat karo
+        }
+
+        // --- Yahan se Niche Normal Calculation shuru ---
 
         const oldFutRate = parseFloat(document.getElementById('oldFutVal').value) || 0;
         const oldOptType = document.getElementById('oldOptType').value;
@@ -431,10 +630,7 @@ letter-spacing: 0.5px;
                 } else {
                     input.classList.remove('error-border');
                 }
-            } else {
-                input.classList.remove('error-border');
             }
-            
             lotSizes[scrip] = val || 1; 
         });
 
@@ -455,7 +651,10 @@ letter-spacing: 0.5px;
 
         let outputHeaders = [...fileHeaders, "OLD_BROKERAGE", "NEW_BROKERAGE", "REVERSAL_AMOUNT"];
         let resultCSV = [outputHeaders.join(",")];
+        
         let totalReversal = 0;
+        let totalOldBrok = 0;
+        let totalNewBrok = 0;
 
         for (let i = 1; i < fileData.length; i++) {
             let row = fileData[i];
@@ -493,7 +692,10 @@ letter-spacing: 0.5px;
             }
 
             let reversal = oldBrok - newBrok;
+            
             totalReversal += reversal;
+            totalOldBrok += oldBrok;
+            totalNewBrok += newBrok;
 
             row.push(oldBrok.toFixed(2));
             row.push(newBrok.toFixed(2));
@@ -502,10 +704,40 @@ letter-spacing: 0.5px;
             resultCSV.push(row.join(","));
         }
 
+        let totalRow = new Array(fileHeaders.length).fill(""); 
+        totalRow[0] = "TOTAL"; 
+        totalRow.push(totalOldBrok.toFixed(2));
+        totalRow.push(totalNewBrok.toFixed(2));
+        totalRow.push(totalReversal.toFixed(2));
+        resultCSV.push(totalRow.join(","));
+
+        // RESULT SAVE KARO (Agli baar ke liye)
+        cachedResult = resultCSV.join("\n");
+        lastState = currentState;
+
         const outDiv = document.getElementById('output');
         outDiv.style.display = 'block';
-        outDiv.innerText = `Success! Total Reversal Amount: ${totalReversal.toFixed(2)}`;
-        downloadCSV(resultCSV.join("\n"), "Brokerage_Reversal_Calculated.csv");
+        
+        outDiv.innerHTML = `
+            <div class="summary-container">
+                <div class="summary-item">
+                    <span class="summary-label">TOTAL OLD</span>
+                    <span class="summary-value val-red">${totalOldBrok.toFixed(2)}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">TOTAL NEW</span>
+                    <span class="summary-value val-blue">${totalNewBrok.toFixed(2)}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">REVERSAL AMOUNT</span>
+                    <span class="summary-value val-green">${totalReversal.toFixed(2)}</span>
+                </div>
+            </div>
+        `;
+
+        if (mode === 'download') {
+            downloadCSV(cachedResult, "Brokerage_Reversal_Calculated.csv");
+        }
     }
 
     function downloadCSV(csvContent, fileName) {
