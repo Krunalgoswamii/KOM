@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brokerage Reversal Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent-color: #00b670; 
+            --accent-hover: #00945b;  
+            --text-dark: #1E293B; 
+            --text-light: #64748B;
+            --border-color: #E2E8F0;
+            --bg-light: #F8FAFC;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --danger-light: #FEF2F2;
+            --danger-border: #FCA5A5;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-light); 
+            color: var(--text-dark);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container { 
+            background-color: #FFFFFF; 
+            padding: 40px; 
+            border-radius: 16px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05); 
+            width: 100%;
+            max-width: 850px;
+			position: relative;
+			border: 1px solid var(--border-color);
+        }
+
+        h2 { 
+            text-align: center; 
+            color: var(--text-dark); 
+            font-weight: 700; 
+            margin-bottom: 30px; 
+            letter-spacing: -0.5px;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .section { 
+            margin-bottom: 35px; 
+        }
+
+        .row { 
+            display: flex; 
+            gap: 24px; 
+        }
+
+        .col { 
+            flex: 1; 
+            background: #FAFAFA;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Module Specific Styling */
+        .old-module { border-top: 4px solid #EF4444; }
+        .new-module { border-top: 4px solid #3B82F6; }
+
+        h4 {
+            margin: 0 0 15px 0;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        label { 
+            display: block; 
+            margin-top: 12px; 
+            font-weight: 500; 
+            font-size: 13px; 
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        small {
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        /* Input Styling inspired by reference */
+        input[type="number"], 
+        select, 
+        input[type="file"] { 
+            width: 100%; 
+            padding: 10px 12px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            font-size: 14px; 
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+            box-sizing: border-box;
+            background: #fff;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 182, 112, 0.1);
+        }
+
+        /* Scrip Grid Styling */
+        .scrip-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+            gap: 12px; 
+            margin-top: 15px; 
+        }
+
+        .scrip-box { 
+            background: #fff; 
+            padding: 12px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .scrip-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .scrip-box.unknown { 
+            background-color: #FFF7ED; 
+            border-color: #FDBA74; 
+        }
+
+        .scrip-label { 
+            font-size: 12px; 
+            font-weight: 700; 
+            color: var(--text-dark); 
+            margin-bottom: 6px; 
+            display: block; 
+        }
+
+        /* Button Styling */
+        button.primary-btn { 
+            background-color: var(--accent-color); 
+            color: white; 
+            padding: 14px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            font-weight: 600; 
+            width: 100%; 
+            transition: background-color 0.2s; 
+            margin-top: 10px;
+        }
+
+        button.primary-btn:hover { 
+            background-color: var(--accent-hover); 
+        }
+
+        /* Utilities */
+        .error-border { 
+            border-color: #EF4444 !important; 
+            background-color: #FEF2F2 !important; 
+        }
+
+        .info-text { 
+            font-size: 13px; 
+            color: var(--text-light); 
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        #output { 
+            margin-top: 25px; 
+            font-weight: 600; 
+            text-align: center; 
+            color: var(--accent-color); 
+            font-size: 16px; 
+            padding: 15px;
+            background: #F0FDF4;
+            border-radius: 8px;
+            display: none; /* Hidden by default */
+        }
+		
+		.container::before {
+    content: "";
+    position: absolute;
+    inset: -2px; /* बॉक्स से 2px बाहर */
+    border-radius: 14px; /* Container radius (12px) + 2px */
+    
+    /* Gemini Colors */
+    background: linear-gradient(45deg, #4285f4, #db4437, #f4b400, #0f9d58, #4285f4, #db4437, #f4b400, #0f9d58); 
+    background-size: 400% 400%; 
+    
+    z-index: -1; /* कंटेंट के पीछे */
+    animation: geminiFlow 3s ease-in-out forwards;
+}
+
+/* 2. Glow Effect (धुंधली रोशनी) */
+.container::after {
+    content: "";
+    position: absolute;
+    inset: -5px; /* बॉर्डर से थोड़ा और बाहर */
+    border-radius: 16px;
+    
+    background: linear-gradient(45deg, #4285f4, #db4437, #f4b400, #0f9d58, #4285f4, #db4437, #f4b400, #0f9d58); 
+    background-size: 400% 400%;
+    
+    z-index: -2; /* सबसे पीछे */
+    filter: blur(10px); /* ग्लो इफेक्ट */
+    opacity: 0.7;
+    
+    animation: geminiFlow 2s ease-in-out forwards;
+}
+@keyframes geminiFlow {
+    0% {
+        background-position: 0% 50%;
+        opacity: 1; 
+    }
+    75% {
+        opacity: 1; /* 1.5 सेकंड तक पूरा दिखेगा */
+    }
+    100% {
+        background-position: 100% 50%;
+        opacity: 0; /* 2 सेकंड पर गायब */
+    }
+}
+
+.author-credit {
+position: absolute;
+top: 20px;
+right: 40px;
+font-size: 0.95rem; /* Medium size, na bada na chota */
+font-weight: 600;
+color: #64748B; /* Thoda greyish color taaki premium lage */
+font-family: 'Inter', sans-serif;
+letter-spacing: 0.5px;
+}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Brokerage Reversal Tool</h2>
+	
+	<div class="author-credit">By : Krunal Goswami</div>
+    
+    <div class="section">
+        <h3>1. Upload Data</h3>
+        <p class="info-text">Select your brokerage CSV file to begin.</p>
+        <input type="file" id="csvFile" accept=".csv" onchange="handleFileSelect()">
+    </div>
+
+    <div class="section">
+        <h3>2. Brokerage Settings</h3>
+        
+        <div class="row">
+            <div class="col old-module">
+                <h4 style="color: #EF4444;">OLD Brokerage</h4>
+                
+                <label>Future (%):</label>
+                <input type="number" id="oldFutVal" placeholder="0.03" step="0.0001">
+                <small>Based on Future Turnover</small>
+
+                <label>Option Type:</label>
+                <select id="oldOptType">
+                    <option value="lot">Per Lot (Flat)</option>
+                    <option value="percent">Percentage (%)</option>
+                </select>
+
+                <label>Option Value:</label>
+                <input type="number" id="oldOptVal" placeholder="20" step="0.0001">
+            </div>
+
+            <div class="col new-module">
+                <h4 style="color: #3B82F6;">NEW Brokerage</h4>
+                
+                <label>Future (%):</label>
+                <input type="number" id="newFutVal" placeholder="0.01" step="0.0001">
+
+                <label>Option Type:</label>
+                <select id="newOptType">
+                    <option value="lot">Per Lot (Flat)</option>
+                    <option value="percent">Percentage (%)</option>
+                </select>
+
+                <label>Option Value:</label>
+                <input type="number" id="newOptVal" placeholder="10" step="0.0001">
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="lotSizeSection">
+        <h3>3. Scrip & Lot Sizes</h3>
+        <p class="info-text">Lot sizes are auto-detected. Please verify values for any <span style="color:#D97706; font-weight:bold;">New Scrips</span>.</p>
+        
+        <div id="scripContainer" class="scrip-grid">
+            <div style="grid-column: 1/-1; text-align: center; color: #94A3B8; padding: 20px; font-size: 14px; border: 1px dashed #E2E8F0; border-radius: 8px;">
+                Waiting for file upload...
+            </div>
+        </div>
+    </div>
+
+    <button class="primary-btn" onclick="calculateAndDownload()">Calculate & Download File</button>
+
+    <div id="output"></div>
+</div>
+
+<script>
+    // Known Standard Lot Sizes
+    const KNOWN_LOTS = {
+        "NIFTY": 75, "BANKNIFTY": 35, "FINNIFTY": 65, 
+        "MIDCPNIFTY": 140, "SENSEX": 20, "BANKEX": 30
+    };
+
+    let fileData = []; 
+    let fileHeaders = [];
+
+    function parseCSV(text) {
+        const rows = text.replace(/\r/g, '').split('\n').filter(row => row.trim() !== '');
+        return rows.map(row => row.split(','));
+    }
+
+    function handleFileSelect() {
+        const fileInput = document.getElementById('csvFile');
+        const container = document.getElementById('scripContainer');
+        
+        if (!fileInput.files.length) return;
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const data = parseCSV(text);
+            
+            if (data.length < 2) {
+                alert("File is empty or invalid format.");
+                return;
+            }
+
+            fileHeaders = data[0].map(h => h.trim());
+            fileData = data;
+
+            const idxScrip = fileHeaders.indexOf('SCRIP NAME');
+            
+            if (idxScrip === -1) {
+                container.innerHTML = `<div style="color:red; text-align:center;">Error: 'SCRIP NAME' column not found.</div>`;
+                return;
+            }
+
+            const uniqueScrips = new Set();
+            for (let i = 1; i < data.length; i++) {
+                if (data[i].length > idxScrip) {
+                    let scrip = data[i][idxScrip].trim().toUpperCase();
+                    if (scrip) uniqueScrips.add(scrip);
+                }
+            }
+
+            container.innerHTML = "";
+            
+            if (uniqueScrips.size === 0) {
+                container.innerHTML = "<div style='text-align:center; color:#64748B'>No Scrips found in file.</div>";
+                return;
+            }
+
+            uniqueScrips.forEach(scrip => {
+                const isKnown = KNOWN_LOTS.hasOwnProperty(scrip);
+                const defaultVal = isKnown ? KNOWN_LOTS[scrip] : "";
+                const boxClass = isKnown ? "scrip-box" : "scrip-box unknown";
+                
+                const html = `
+                    <div class="${boxClass}">
+                        <label class="scrip-label">${scrip}</label>
+                        <input type="number" class="lot-input" data-scrip="${scrip}" value="${defaultVal}" placeholder="Size">
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        };
+
+        reader.readAsText(file);
+    }
+
+    function calculateAndDownload() {
+        if (!fileData.length) {
+            alert("Please upload a CSV file first.");
+            return;
+        }
+
+        const oldFutRate = parseFloat(document.getElementById('oldFutVal').value) || 0;
+        const oldOptType = document.getElementById('oldOptType').value;
+        const oldOptVal = parseFloat(document.getElementById('oldOptVal').value) || 0;
+
+        const newFutRate = parseFloat(document.getElementById('newFutVal').value) || 0;
+        const newOptType = document.getElementById('newOptType').value;
+        const newOptVal = parseFloat(document.getElementById('newOptVal').value) || 0;
+
+        const isLotBased = (oldOptType === 'lot' || newOptType === 'lot');
+
+        let lotSizes = {};
+        const inputs = document.querySelectorAll('.lot-input');
+        let errorFound = false;
+
+        inputs.forEach(input => {
+            const scrip = input.getAttribute('data-scrip');
+            let val = parseFloat(input.value);
+            
+            if (isLotBased) {
+                if (!val || val <= 0) {
+                    input.classList.add('error-border');
+                    errorFound = true;
+                } else {
+                    input.classList.remove('error-border');
+                }
+            } else {
+                input.classList.remove('error-border');
+            }
+            
+            lotSizes[scrip] = val || 1; 
+        });
+
+        if (errorFound) {
+            alert("Action Required: Please enter valid Lot Sizes for the highlighted scrips.");
+            return;
+        }
+
+        const idxQty = fileHeaders.indexOf('QUANTITY');
+        const idxOptPrem = fileHeaders.indexOf('OPTION TURN_PREMIUM');
+        const idxFutTurn = fileHeaders.indexOf('TRADING FUTURE_TURNOVER');
+        const idxScrip = fileHeaders.indexOf('SCRIP NAME');
+
+        if (idxQty === -1 || idxOptPrem === -1 || idxFutTurn === -1 || idxScrip === -1) {
+            alert("Required columns missing in file.");
+            return;
+        }
+
+        let outputHeaders = [...fileHeaders, "OLD_BROKERAGE", "NEW_BROKERAGE", "REVERSAL_AMOUNT"];
+        let resultCSV = [outputHeaders.join(",")];
+        let totalReversal = 0;
+
+        for (let i = 1; i < fileData.length; i++) {
+            let row = fileData[i];
+            if (row.length <= idxScrip) continue;
+
+            let qty = parseFloat(row[idxQty]) || 0;
+            let optPrem = parseFloat(row[idxOptPrem]) || 0;
+            let futTurn = parseFloat(row[idxFutTurn]) || 0;
+            let scrip = row[idxScrip] ? row[idxScrip].trim().toUpperCase() : "";
+
+            let lotSize = lotSizes[scrip] || 1; 
+
+            let oldBrok = 0;
+            let newBrok = 0;
+
+            if (futTurn > 0) {
+                oldBrok += futTurn * (oldFutRate / 100);
+                newBrok += futTurn * (newFutRate / 100);
+            }
+
+            if (optPrem > 0 || (qty > 0 && futTurn === 0)) {
+                if (oldOptType === 'percent') {
+                    oldBrok += optPrem * (oldOptVal / 100);
+                } else {
+                    let lots = qty / lotSize;
+                    oldBrok += lots * oldOptVal;
+                }
+
+                if (newOptType === 'percent') {
+                    newBrok += optPrem * (newOptVal / 100);
+                } else {
+                    let lots = qty / lotSize;
+                    newBrok += lots * newOptVal;
+                }
+            }
+
+            let reversal = oldBrok - newBrok;
+            totalReversal += reversal;
+
+            row.push(oldBrok.toFixed(2));
+            row.push(newBrok.toFixed(2));
+            row.push(reversal.toFixed(2));
+
+            resultCSV.push(row.join(","));
+        }
+
+        const outDiv = document.getElementById('output');
+        outDiv.style.display = 'block';
+        outDiv.innerText = `Success! Total Reversal Amount: ${totalReversal.toFixed(2)}`;
+        downloadCSV(resultCSV.join("\n"), "Brokerage_Reversal_Calculated.csv");
+    }
+
+    function downloadCSV(csvContent, fileName) {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+</script>
+
+</body>
+</html>
