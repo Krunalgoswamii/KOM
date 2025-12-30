@@ -365,6 +365,26 @@
         </div>
     </div>
 	
+	<div id="splitResultCard" style="display:none; margin-top: 20px; background: #fff; border: 1px solid #E2E8F0; border-radius: 8px; overflow: hidden;">
+                
+                <div style="background: #F0FDF4; padding: 15px; border-bottom: 1px solid #E2E8F0;">
+                    <div style="font-size: 12px; font-weight: 700; color: #166534; margin-bottom: 5px;">SELECTED CLIENTS LIST</div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Count: <b id="selCount">0</b></span>
+                        <span>Amount: <b id="selAmt">₹ 0.00</b></span>
+                    </div>
+                </div>
+
+                <div style="background: #eff6ff; padding: 15px;">
+                    <div style="font-size: 12px; font-weight: 700; color: #1e40af; margin-bottom: 5px;">REMAINING CLIENTS LIST</div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Count: <b id="remCount">0</b></span>
+                        <span>Amount: <b id="remAmt">₹ 0.00</b></span>
+                    </div>
+                </div>
+
+            </div>
+	
     <div style="border-top: 2px dashed #E2E8F0; margin: 30px 0 20px 0; text-align: center;">
         <span style="background: #fff; padding: 0 10px; color: #94A3B8; font-size: 12px; font-weight: 600; position: relative; top: -10px;">OR CHECK AMOUNT & CLIENT</span>
     </div>
@@ -688,7 +708,6 @@ function updateFileName(input, boxId, labelId, nameId) {
     }
 
     async function splitFiles() {
-        // Ab ye naye box "splitFile" se file uthayega
         const pInput = document.getElementById('splitFile');
         const textArea = document.getElementById('clientListInput');
         
@@ -703,33 +722,49 @@ function updateFileName(input, boxId, labelId, nameId) {
             return;
         }
 
-        // Get Client List Array (clean spaces)
         const targetClients = rawList.split('\n').map(c => c.trim().toUpperCase()).filter(c => c !== "");
-
         const pText = await pInput.files[0].text();
         const pLines = pText.split(/\r?\n/);
         
         let selectedRows = [];
         let remainingRows = [];
+        
+        // Variables for Totals
+        let selTotal = 0;
+        let remTotal = 0;
 
         pLines.forEach(line => {
             if (!line.trim()) return;
             const cols = line.split(',');
-            // Column 3 (index 3) is Client Code
             const clientCode = (cols[3] || "").trim().toUpperCase();
+            
+            // Get Amount (Column 6 aka Index 5)
+            const val = parseFloat(cols[5]);
+            const amount = isNaN(val) ? 0 : val;
 
-            // Logic: Is this client in our pasted list?
             if (targetClients.includes(clientCode)) {
                 selectedRows.push(line);
+                selTotal += amount; // Add to Selected Total
             } else {
                 remainingRows.push(line);
+                remTotal += amount; // Add to Remaining Total
             }
         });
 
+        // --- UPDATE UI DISPLAY ---
+        document.getElementById('selCount').innerText = selectedRows.length;
+        document.getElementById('selAmt').innerText = "₹ " + selTotal.toLocaleString('en-IN', {minimumFractionDigits: 2});
+        
+        document.getElementById('remCount').innerText = remainingRows.length;
+        document.getElementById('remAmt').innerText = "₹ " + remTotal.toLocaleString('en-IN', {minimumFractionDigits: 2});
+
+        // Show the Result Box
+        document.getElementById('splitResultCard').style.display = 'block';
+
+        // --- DOWNLOAD PROCESS ---
         const now = new Date();
         const dStrDash = `${String(now.getDate()).padStart(2,'0')}-${String(now.getMonth()+1).padStart(2,'0')}-${now.getFullYear()}`;
 
-        // Download Files
         if (selectedRows.length > 0) {
             download(selectedRows.join('\r\n'), `SELECTED_${selectedRows.length}_Clients_${dStrDash}.txt`, 'text/plain');
         } else {
@@ -741,10 +776,7 @@ function updateFileName(input, boxId, labelId, nameId) {
                 download(remainingRows.join('\r\n'), `REMAINING_${remainingRows.length}_Clients_${dStrDash}.txt`, 'text/plain');
             }, 500);
         }
-        
-        alert(`Process Done!\n\nSelected List: ${selectedRows.length} Clients\nRemaining List: ${remainingRows.length} Clients`);
     }
-
 
 </script>
 
