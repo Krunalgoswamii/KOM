@@ -255,6 +255,57 @@
         opacity: 0; /* 2 सेकंड पर गायब */
     }
 }
+
+.splitter-section {
+            margin-top: 30px;
+            border-top: 2px dashed #E2E8F0;
+            padding-top: 20px;
+        }
+        
+        .toggle-btn {
+            background-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+        .toggle-btn:hover {
+            background-color: #2563eb;
+            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .split-area {
+            display: none;
+            margin-top: 15px;
+            background: #eff6ff;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #bfdbfe;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            resize: vertical;
+            box-sizing: border-box;
+            outline: none;
+        }
+        textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .split-btn {
+            background-color: #1e293b;
+            margin-top: 10px;
+        }
+        .split-btn:hover {
+            background-color: #0f172a;
+        }
+		
+
     </style>
 </head>
 <body>
@@ -296,6 +347,24 @@
             <ul id="nspbClientList" class="nspb-list"></ul>
         </div>
     </div>
+	
+	<div class="splitter-section">
+        <button class="toggle-btn" onclick="toggleSplitter()">Bank File Split by Clients</button>
+        
+        <div id="splitArea" class="split-area">
+            <div class="upload-box" id="box3" style="background: #fff; margin-bottom: 15px;">
+                <span class="upload-label" id="label3">Import Bank File to Split</span>
+                <span class="file-name" id="name3"></span>
+                <input type="file" id="splitFile" accept=".txt" onchange="updateFileName(this, 'box3', 'label3', 'name3')">
+            </div>
+
+            <p style="font-size: 12px; color: #64748B; margin-bottom: 8px; font-weight: 600;">Paste Client Codes below (One per line):</p>
+            <textarea id="clientListInput" placeholder="A001&#10;B002&#10;C003..."></textarea>
+            
+            <button class="split-btn" onclick="splitFiles()">SPLIT & DOWNLOAD</button>
+        </div>
+    </div>
+	
     <div style="border-top: 2px dashed #E2E8F0; margin: 30px 0 20px 0; text-align: center;">
         <span style="background: #fff; padding: 0 10px; color: #94A3B8; font-size: 12px; font-weight: 600; position: relative; top: -10px;">OR CHECK AMOUNT & CLIENT</span>
     </div>
@@ -573,7 +642,112 @@ function animateCounter(id, start, end, duration, isCurrency) {
         input.value = '';
     }
 
+function updateFileName(input, boxId, labelId, nameId) {
+        const box = document.getElementById(boxId);
+        const nameSpan = document.getElementById(nameId);
+        const label = document.getElementById(labelId);
+        
+        box.classList.remove('shake-error');
+        label.classList.remove('error-text');
+
+        if (input.files.length > 0) {
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const content = e.target.result;
+                let isValid = false;
+
+                // Validation logic (Payout File aur Split File dono ke liye same check)
+                if ((input.id === 'payoutFile' || input.id === 'splitFile') && content.includes("923020039179306")) {
+                    isValid = true;
+                } else if (input.id === 'errorFile' && content.includes("~")) {
+                    isValid = true;
+                }
+
+                if (isValid) {
+                    box.classList.add('has-file');
+                    label.innerText = "File Selected";
+                    nameSpan.innerText = file.name;
+                    nameSpan.style.display = "block";
+                } else {
+                    box.classList.add('shake-error');
+                    label.innerText = "Wrong file format";
+                    label.classList.add('error-text');
+                    input.value = ""; // Reset input
+                }
+            };
+            reader.readAsText(file);
+        }
+    }
+
+    // --- NEW SPLIT FUNCTIONALITY (UPDATED) ---
+    function toggleSplitter() {
+        const area = document.getElementById('splitArea');
+        area.style.display = area.style.display === 'none' || area.style.display === '' ? 'block' : 'none';
+    }
+
+    async function splitFiles() {
+        // Ab ye naye box "splitFile" se file uthayega
+        const pInput = document.getElementById('splitFile');
+        const textArea = document.getElementById('clientListInput');
+        
+        if (!pInput.files[0]) {
+            alert("Please Select 'Import Bank File to Split' first!");
+            return;
+        }
+
+        const rawList = textArea.value.trim();
+        if (!rawList) {
+            alert("Please Paste Client Codes in the box!");
+            return;
+        }
+
+        // Get Client List Array (clean spaces)
+        const targetClients = rawList.split('\n').map(c => c.trim().toUpperCase()).filter(c => c !== "");
+
+        const pText = await pInput.files[0].text();
+        const pLines = pText.split(/\r?\n/);
+        
+        let selectedRows = [];
+        let remainingRows = [];
+
+        pLines.forEach(line => {
+            if (!line.trim()) return;
+            const cols = line.split(',');
+            // Column 3 (index 3) is Client Code
+            const clientCode = (cols[3] || "").trim().toUpperCase();
+
+            // Logic: Is this client in our pasted list?
+            if (targetClients.includes(clientCode)) {
+                selectedRows.push(line);
+            } else {
+                remainingRows.push(line);
+            }
+        });
+
+        const now = new Date();
+        const dStrDash = `${String(now.getDate()).padStart(2,'0')}-${String(now.getMonth()+1).padStart(2,'0')}-${now.getFullYear()}`;
+
+        // Download Files
+        if (selectedRows.length > 0) {
+            download(selectedRows.join('\r\n'), `SELECTED_${selectedRows.length}_Clients_${dStrDash}.txt`, 'text/plain');
+        } else {
+            alert("No matching clients found from your list!");
+        }
+
+        if (remainingRows.length > 0) {
+            setTimeout(() => {
+                download(remainingRows.join('\r\n'), `REMAINING_${remainingRows.length}_Clients_${dStrDash}.txt`, 'text/plain');
+            }, 500);
+        }
+        
+        alert(`Process Done!\n\nSelected List: ${selectedRows.length} Clients\nRemaining List: ${remainingRows.length} Clients`);
+    }
+
+
 </script>
 
 </body>
 </html>
+
