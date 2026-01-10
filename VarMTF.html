@@ -1,199 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>VAR File Processor - Minimalist</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --accent-color: #00b670; /* Sapphire Blue */
-            --accent-light: #d5e2e9; /* Very light blue for subtle backgrounds */
-            --text-dark: #1E293B; /* Dark Slate for readability */
-            --text-subtle: #64748B;
-            --border-color: #E2E8F0;
-            --success-color: #059669; /* Deep Green */
-            --danger-color: #EF4444; /* Clean Red */
-            --transition-speed: 0.3s;
-        }
+<meta charset="UTF-8">
+<title>VAR File Processor - Minimalist</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+--accent-color: #00b670; /* Sapphire Blue */
+--accent-light: #d5e2e9; /* Very light blue for subtle backgrounds */
+--text-dark: #1E293B; /* Dark Slate for readability */
+--text-subtle: #64748B;
+--border-color: #E2E8F0;
+--success-color: #059669; /* Deep Green */
+--danger-color: #EF4444; /* Clean Red */
+--transition-speed: 0.3s;
+}
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #F8FAFC; 
-            color: var(--text-dark);
-            padding: 40px;
-            margin: 0;
-            line-height: 1.5;
-        }
+body {
+font-family: 'Inter', sans-serif;
+background-color: #F8FAFC;
+color: var(--text-dark);
+padding: 40px;
+margin: 0;
+line-height: 1.5;
+}
 
-        .container {
-            max-width: 850px;
-            margin: 0 auto;
-            background-color: #FFFFFF;
-            padding: 50px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        }
+.container {
+max-width: 850px;
+margin: 0 auto;
+background-color: #FFFFFF;
+padding: 50px;
+border-radius: 12px;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
 
-        h1 {
-            color: var(--text-dark);
-            text-align: center;
-            margin-bottom: 5px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        
-        .credit {
-            text-align: center;
-            color: var(--text-subtle);
-            font-size: 0.9em;
-            margin-top: -5px;
-            margin-bottom: 30px;
-            font-weight: 500;
-        }
+h1 {
+color: var(--text-dark);
+text-align: center;
+margin-bottom: 5px;
+font-weight: 700;
+letter-spacing: -0.5px;
+}
 
-        p.description {
-            text-align: center;
-            margin-bottom: 40px;
-            color: var(--text-subtle);
-            font-size: 1.05em;
-        }
+.credit {
+text-align: center;
+color: var(--text-subtle);
+font-size: 0.9em;
+margin-top: -5px;
+margin-bottom: 30px;
+font-weight: 500;
+}
 
-        /* --- Input Card Styles --- */
-        .file-input-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
+p.description {
+text-align: center;
+margin-bottom: 40px;
+color: var(--text-subtle);
+font-size: 1.05em;
+}
 
-        .input-card {
-            border: 1px solid var(--border-color);
-            padding: 25px;
-            border-radius: 8px;
-            background: #FFFFFF;
-            transition: all var(--transition-speed);
-            position: relative;
-            cursor: pointer;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100px; /* Ensure a good clickable area */
-        }
+/* --- Input Card Styles --- */
+.file-input-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+gap: 20px;
+margin-bottom: 30px;
+}
 
-        .input-card:hover {
-            border-color: var(--accent-color);
-            box-shadow: 0 4px 10px rgba(0, 119, 182, 0.1);
-            transform: translateY(-2px);
-        }
+.input-card {
+border: 1px solid var(--border-color);
+padding: 25px;
+border-radius: 8px;
+background: #FFFFFF;
+transition: all var(--transition-speed);
+position: relative;
+cursor: pointer;
+overflow: hidden;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+min-height: 100px; /* Ensure a good clickable area */
+}
 
-        .input-card.complete {
-            background-color: var(--accent-light);
-            border-color: var(--accent-color);
-        }
-        
-        /* --- Error Styles --- */
-        .input-card.error-shake {
-            border-color: var(--danger-color) !important;
-            animation: shake 0.4s;
-            background-color: #FEF2F2; /* Light red background */
-        }
+.input-card:hover {
+border-color: var(--accent-color);
+box-shadow: 0 4px 10px rgba(0, 119, 182, 0.1);
+transform: translateY(-2px);
+}
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
-        }
+.input-card.complete {
+background-color: var(--accent-light);
+border-color: var(--accent-color);
+}
 
-        .error-message {
-            display: block;
-            color: var(--danger-color);
-            font-size: 0.85em;
-            font-weight: 600;
-            margin-top: 5px;
-            padding-top: 5px;
-            border-top: 1px dashed var(--danger-color);
-            pointer-events: none;
-            width: 100%;
-            text-align: center;
-        }
-        /* --- End Error Styles --- */
+/* --- Error Styles --- */
+.input-card.error-shake {
+border-color: var(--danger-color) !important;
+animation: shake 0.4s;
+background-color: #FEF2F2; /* Light red background */
+}
 
-        .card-title {
-            display: block;
-            font-weight: 600;
-            font-size: 1.1em;
-            text-align: center;
-            pointer-events: none;
-            margin-bottom: 5px;
-        }
-        
-        /* Hiding the standard "Choose File" button */
-        .input-card input[type="file"] {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-            z-index: 10;
-        }
+@keyframes shake {
+0%, 100% { transform: translateX(0); }
+20%, 60% { transform: translateX(-5px); }
+40%, 80% { transform: translateX(5px); }
+}
 
-        /* --- Button and Status Styles --- */
-        #processButton {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: 600; 
-            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
-            text-align: center; /* Ensures the text is centered */
-        }
+.error-message {
+display: block;
+color: var(--danger-color);
+font-size: 0.85em;
+font-weight: 600;
+margin-top: 5px;
+padding-top: 5px;
+border-top: 1px dashed var(--danger-color);
+pointer-events: none;
+width: 100%;
+text-align: center;
+}
+/* --- End Error Styles --- */
 
-        #processButton:hover:not(:disabled) {
-            background-color: #005A8D;
-            box-shadow: 0 5px 15px rgba(0, 119, 182, 0.2);
-        }
+.card-title {
+display: block;
+font-weight: 600;
+font-size: 1.1em;
+text-align: center;
+pointer-events: none;
+margin-bottom: 5px;
+}
 
-        #processButton:disabled {
-            background-color: #CBD5E1;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        
-        /* --- Progress Indicator (Slim) --- */
-        #progressBarContainer {
-            margin-top: 20px;
-            height: 4px;
-            background-color: var(--border-color);
-            border-radius: 2px;
-            overflow: hidden;
-            display: none;
-        }
-        #progressBar {
-            height: 100%;
-            width: 0%;
-            background-color: var(--accent-color);
-            transition: width 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
+/* Hiding the standard "Choose File" button */
+.input-card input[type="file"] {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+opacity: 0;
+cursor: pointer;
+z-index: 10;
+}
 
-        #statusMessage {
-            text-align: center;
-            padding: 10px;
-            margin-top: 15px;
-            color: var(--text-subtle);
-            font-size: 0.9em;
-            min-height: 20px;
-        }
-		.container {
+/* --- Button and Status Styles --- */
+#processButton {
+display: block;
+width: 100%;
+padding: 15px;
+background-color: var(--accent-color);
+color: white;
+border: none;
+cursor: pointer;
+border-radius: 8px;
+font-size: 1.1em;
+font-weight: 600;
+transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+text-align: center; /* Ensures the text is centered */
+}
+
+#processButton:hover:not(:disabled) {
+background-color: #005A8D;
+box-shadow: 0 5px 15px rgba(0, 119, 182, 0.2);
+}
+
+#processButton:disabled {
+background-color: #CBD5E1;
+cursor: not-allowed;
+box-shadow: none;
+}
+
+/* --- Progress Indicator (Slim) --- */
+#progressBarContainer {
+margin-top: 20px;
+height: 4px;
+background-color: var(--border-color);
+border-radius: 2px;
+overflow: hidden;
+display: none;
+}
+#progressBar {
+height: 100%;
+width: 0%;
+background-color: var(--accent-color);
+transition: width 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+#statusMessage {
+text-align: center;
+padding: 10px;
+margin-top: 15px;
+color: var(--text-subtle);
+font-size: 0.9em;
+min-height: 20px;
+}
+.container {
 position: relative; /* Ye bahut zaroori hai */
 max-width: 1200px;
 margin: auto;
@@ -215,425 +215,435 @@ font-family: 'Inter', sans-serif;
 letter-spacing: 0.5px;
 }
 
-        .result {
-            margin-top: 40px;
-            padding: 25px;
-            border-left: 5px solid var(--success-color);
-            background-color: #F0FAF0;
-            color: var(--text-dark);
-            border-radius: 4px;
-            font-size: 1.1em;
-            font-weight: 600;
-            text-align: center;
-            display: none;
-            opacity: 0;
-            animation: fadeIn 0.8s forwards;
-        }
+.result {
+margin-top: 40px;
+padding: 25px;
+border-left: 5px solid var(--success-color);
+background-color: #F0FAF0;
+color: var(--text-dark);
+border-radius: 4px;
+font-size: 1.1em;
+font-weight: 600;
+text-align: center;
+display: none;
+opacity: 0;
+animation: fadeIn 0.8s forwards;
+}
 
-        .result.error {
-            border-left: 5px solid var(--danger-color);
-            background-color: #FEF2F2;
-        }
+.result.error {
+border-left: 5px solid var(--danger-color);
+background-color: #FEF2F2;
+}
 
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
+@keyframes fadeIn {
+to { opacity: 1; }
+}
 
-        .file-name-display {
-            display: block;
-            font-weight: 500;
-            color: var(--text-dark);
-            font-size: 0.85em;
-            margin-top: 5px;
-            padding-top: 5px;
-            border-top: 1px dashed var(--border-color);
-            pointer-events: none;
-            width: 100%;
-            text-align: center;
-        }
-        
-        .input-card.complete .file-name-display {
-             border-color: var(--accent-color);
-        }
-		
-		.container::before {
-    content: "";
-    position: absolute;
-    inset: -2px; /* बॉक्स से 2px बाहर */
-    border-radius: 14px; /* Container radius (12px) + 2px */
-    
-    /* Gemini Colors */
-    background: linear-gradient(45deg, #4285f4, #db4437, #f4b400, #0f9d58, #4285f4, #db4437, #f4b400, #0f9d58); 
-    background-size: 400% 400%; 
-    
-    z-index: -1; /* कंटेंट के पीछे */
-    animation: geminiFlow 3s ease-in-out forwards;
+.file-name-display {
+display: block;
+font-weight: 500;
+color: var(--text-dark);
+font-size: 0.85em;
+margin-top: 5px;
+padding-top: 5px;
+border-top: 1px dashed var(--border-color);
+pointer-events: none;
+width: 100%;
+text-align: center;
+}
+
+.input-card.complete .file-name-display {
+border-color: var(--accent-color);
+}
+
+.container::before {
+content: "";
+position: absolute;
+inset: -2px; /* बॉक्स से 2px बाहर */
+border-radius: 14px; /* Container radius (12px) + 2px */
+
+/* Gemini Colors */
+background: linear-gradient(45deg, #4285f4, #db4437, #f4b400, #0f9d58, #4285f4, #db4437, #f4b400, #0f9d58);
+background-size: 400% 400%;
+
+z-index: -1; /* कंटेंट के पीछे */
+animation: geminiFlow 3s ease-in-out forwards;
 }
 
 /* 2. Glow Effect (धुंधली रोशनी) */
 .container::after {
-    content: "";
-    position: absolute;
-    inset: -5px; /* बॉर्डर से थोड़ा और बाहर */
-    border-radius: 16px;
-    
-    background: linear-gradient(45deg, #4285f4, #db4437, #f4b400, #0f9d58, #4285f4, #db4437, #f4b400, #0f9d58); 
-    background-size: 400% 400%;
-    
-    z-index: -2; /* सबसे पीछे */
-    filter: blur(10px); /* ग्लो इफेक्ट */
-    opacity: 0.7;
-    
-    animation: geminiFlow 2s ease-in-out forwards;
+content: "";
+position: absolute;
+inset: -5px; /* बॉर्डर से थोड़ा और बाहर */
+border-radius: 16px;
+
+background: linear-gradient(45deg, #4285f4, #db4437, #f4b400, #0f9d58, #4285f4, #db4437, #f4b400, #0f9d58);
+background-size: 400% 400%;
+
+z-index: -2; /* सबसे पीछे */
+filter: blur(10px); /* ग्लो इफेक्ट */
+opacity: 0.7;
+
+animation: geminiFlow 2s ease-in-out forwards;
 }
 @keyframes geminiFlow {
-    0% {
-        background-position: 0% 50%;
-        opacity: 1; 
-    }
-    75% {
-        opacity: 1; /* 1.5 सेकंड तक पूरा दिखेगा */
-    }
-    100% {
-        background-position: 100% 50%;
-        opacity: 0; /* 2 सेकंड पर गायब */
-    }
-}	
-    </style>
+0% {
+background-position: 0% 50%;
+opacity: 1;
+}
+75% {
+opacity: 1; /* 1.5 सेकंड तक पूरा दिखेगा */
+}
+100% {
+background-position: 100% 50%;
+opacity: 0; /* 2 सेकंड पर गायब */
+}
+}
+</style>
 </head>
 <body>
 
-    <div class="container">
-        
-        <h1>MTF VAR Changes</h1>
-		<div class="author-credit">By : Krunal Goswami</div>
-        <p class="description">Yaha Se Aalo Dalo Waha Se Sona Niklega.</p>
-        
-        <div class="file-input-grid">
-            
-            <div class="input-card" id="card-var">
-                <label for="varFile" class="card-title">VAR File</label>
-                <input type="file" id="varFile" accept=".csv" required onchange="validateFileAndDisplayStatus('varFile', 'card-var', 'Var')">
-            </div>
+<div class="container">
 
-            <div class="input-card" id="card-approved">
-                <label for="approvedScripFile" class="card-title">MTF Approved Scripts</label>
-                <input type="file" id="approvedScripFile" accept=".csv" required onchange="validateFileAndDisplayStatus('approvedScripFile', 'card-approved', 'MTF')">
-            </div>
+<h1>MTF VAR Changes</h1>
+<div class="author-credit">By : Krunal Goswami</div>
+<p class="description">Yaha Se Aalo Dalo Waha Se Sona Niklega.</p>
 
-            <div class="input-card" id="card-nse">
-                <label for="bhavCopyNseFile" class="card-title">NSE BhavCopy</label>
-                <input type="file" id="bhavCopyNseFile" accept=".csv" required onchange="validateFileAndDisplayStatus('bhavCopyNseFile', 'card-nse', 'BhavCopy')">
-            </div>
+<div class="file-input-grid">
 
-            <div class="input-card" id="card-bse">
-                <label for="bhavCopyBseFile" class="card-title">BSE BhavCopy</label>
-                <input type="file" id="bhavCopyBseFile" accept=".csv" required onchange="validateFileAndDisplayStatus('bhavCopyBseFile', 'card-bse', 'BhavCopy')">
-            </div>
+<div class="input-card" id="card-var">
+<label for="varFile" class="card-title">VAR File</label>
+<input type="file" id="varFile" accept=".csv" required onchange="validateFileAndDisplayStatus('varFile', 'card-var', 'Var')">
+</div>
 
-        </div>
+<div class="input-card" id="card-approved">
+<label for="approvedScripFile" class="card-title">MTF Approved Scripts</label>
+<input type="file" id="approvedScripFile" accept=".csv" required onchange="validateFileAndDisplayStatus('approvedScripFile', 'card-approved', 'MTF')">
+</div>
 
-        <button id="processButton" onclick="processFiles()">
-            <span id="buttonText">Process & Download Updated VAR File</span>
-        </button>
+<div class="input-card" id="card-nse">
+<label for="bhavCopyNseFile" class="card-title">NSE BhavCopy</label>
+<input type="file" id="bhavCopyNseFile" accept=".csv" required onchange="validateFileAndDisplayStatus('bhavCopyNseFile', 'card-nse', 'BhavCopy')">
+</div>
 
-        <div id="progressBarContainer">
-            <div id="progressBar"></div>
-        </div>
+<div class="input-card" id="card-bse">
+<label for="bhavCopyBseFile" class="card-title">BSE BhavCopy</label>
+<input type="file" id="bhavCopyBseFile" accept=".csv" required onchange="validateFileAndDisplayStatus('bhavCopyBseFile', 'card-bse', 'BhavCopy')">
+</div>
 
-        <div id="statusMessage">Files to upload karo bhai</div>
+</div>
 
-        <div id="resultMessage" class="result"></div>
-    </div>
+<button id="processButton" onclick="processFiles()">
+<span id="buttonText">Process & Download Updated VAR File</span>
+</button>
 
-    <script>
-        // Column indices (0-based) 
-        const VAR_FILE_ISIN_INDEX = 3;    // Column D
-        const VAR_FILE_MODIFY_INDEX = 6;  // Column G
-        const VAR_FILE_VAR_INDEX = 9;     // Column J
-        
-        // Corrected constants for lookups
-        const APPROVED_SCRIP_ISIN_INDEX = 0; // Column A in Approved Scrip File
-        const BHAVCOPY_ISIN_INDEX = 6;       // Column G in BhavCopy Files
-        
-        const VAR_THRESHOLD = 65;
+<div id="progressBarContainer">
+<div id="progressBar"></div>
+</div>
 
-        // Utility to get CSS variable
-        function varCss(variable) {
-            return getComputedStyle(document.documentElement).getPropertyValue(variable);
-        }
+<div id="statusMessage">Files to upload karo bhai</div>
 
-        // --- UI Helper Functions ---
-        
-        /** Updates the process button and global status message. */
-        function updateGlobalStatus() {
-            const allFilesLoaded = 
-                document.getElementById('varFile').files.length > 0 &&
-                document.getElementById('approvedScripFile').files.length > 0 &&
-                document.getElementById('bhavCopyNseFile').files.length > 0 &&
-                document.getElementById('bhavCopyBseFile').files.length > 0;
-            
-            document.getElementById('processButton').disabled = !allFilesLoaded;
-            
-            if (allFilesLoaded) {
-                 document.getElementById('statusMessage').textContent = 'All files ready. Click "Process" to convert your data into gold.';
-            } else {
-                 document.getElementById('statusMessage').textContent = 'Files to upload karo bhai';
-            }
-        }
+<div id="resultMessage" class="result"></div>
+</div>
 
-        /** Validates file name and updates the card UI status accordingly. */
-        function validateFileAndDisplayStatus(fileInputId, cardId, requiredKeyword = null) {
-            const fileInput = document.getElementById(fileInputId);
-            const card = document.getElementById(cardId);
-            
-            // 1. Clear previous status
-            card.classList.remove('error-shake', 'complete');
-            card.querySelectorAll('.file-name-display, .error-message').forEach(el => el.remove());
+<script>
+// Column indices (0-based)
+const VAR_FILE_ISIN_INDEX = 3; // Column D
+const VAR_FILE_MODIFY_INDEX = 6; // Column G
+const VAR_FILE_COL_I_INDEX = 8;
+const VAR_FILE_VAR_INDEX = 9; // Column J
 
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const filename = file.name;
-                let isValid = true;
-                let errorMessageText = 'File Jo Bhai';
-                const isNseInput = fileInputId === 'bhavCopyNseFile';
-                const isBseInput = fileInputId === 'bhavCopyBseFile';
+// Corrected constants for lookups
+const APPROVED_SCRIP_ISIN_INDEX = 0; // Column A in Approved Scrip File
+const BHAVCOPY_ISIN_INDEX = 6; // Column G in BhavCopy Files
 
-                if (isNseInput || isBseInput) {
-        // Determine the ID of the *other* BhavCopy input
-        const otherBhavCopyFileId = isNseInput ? 'bhavCopyBseFile' : 'bhavCopyNseFile';
-        const otherFileInput = document.getElementById(otherBhavCopyFileId);
-        const otherFile = otherFileInput.files.length > 0 ? otherFileInput.files[0] : null;
+const VAR_THRESHOLD = 65;
 
-        // If the other input has a file AND the names match
-        if (otherFile && filename === otherFile.name) {
-            isValid = false;
-            errorMessageText = 'Cannot use the **same file** for both NSE and BSE BhavCopy!';
-        }
+// Utility to get CSS variable
+function varCss(variable) {
+return getComputedStyle(document.documentElement).getPropertyValue(variable);
+}
+
+// --- UI Helper Functions ---
+
+/** Updates the process button and global status message. */
+function updateGlobalStatus() {
+const allFilesLoaded =
+document.getElementById('varFile').files.length > 0 &&
+document.getElementById('approvedScripFile').files.length > 0 &&
+document.getElementById('bhavCopyNseFile').files.length > 0 &&
+document.getElementById('bhavCopyBseFile').files.length > 0;
+
+document.getElementById('processButton').disabled = !allFilesLoaded;
+
+if (allFilesLoaded) {
+document.getElementById('statusMessage').textContent = 'All files ready. Click "Process" to convert your data into gold.';
+} else {
+document.getElementById('statusMessage').textContent = 'Files to upload karo bhai';
+}
+}
+
+/** Validates file name and updates the card UI status accordingly. */
+function validateFileAndDisplayStatus(fileInputId, cardId, requiredKeyword = null) {
+const fileInput = document.getElementById(fileInputId);
+const card = document.getElementById(cardId);
+
+// 1. Clear previous status
+card.classList.remove('error-shake', 'complete');
+card.querySelectorAll('.file-name-display, .error-message').forEach(el => el.remove());
+
+if (fileInput.files.length > 0) {
+const file = fileInput.files[0];
+const filename = file.name;
+let isValid = true;
+let errorMessageText = 'File Jo Bhai';
+const isNseInput = fileInputId === 'bhavCopyNseFile';
+const isBseInput = fileInputId === 'bhavCopyBseFile';
+
+if (isNseInput || isBseInput) {
+// Determine the ID of the *other* BhavCopy input
+const otherBhavCopyFileId = isNseInput ? 'bhavCopyBseFile' : 'bhavCopyNseFile';
+const otherFileInput = document.getElementById(otherBhavCopyFileId);
+const otherFile = otherFileInput.files.length > 0 ? otherFileInput.files[0] : null;
+
+// If the other input has a file AND the names match
+if (otherFile && filename === otherFile.name) {
+isValid = false;
+errorMessageText = 'Cannot use the **same file** for both NSE and BSE BhavCopy!';
+}
+}
+
+// 2. Perform Validation
+if (requiredKeyword) {
+// Check if the filename (case-insensitive) contains the required keyword (case-insensitive)
+if (!filename.toLowerCase().includes(requiredKeyword.toLowerCase())) {
+isValid = false;
+}
+}
+
+if (isValid) {
+// 3a. Success Logic
+card.classList.add('complete');
+const span = document.createElement('span');
+span.classList.add('file-name-display');
+span.textContent = filename;
+card.appendChild(span);
+} else {
+// 3b. Failure Logic (Shake and Error Message)
+fileInput.value = null; // Reject the file by clearing the input
+
+card.classList.add('error-shake');
+
+// Add error message as requested
+const errorSpan = document.createElement('span');
+errorSpan.classList.add('error-message');
+errorSpan.textContent = 'File Jo Bhai';
+card.appendChild(errorSpan);
+
+// Remove shake class after animation completes for re-use
+card.addEventListener('animationend', () => {
+card.classList.remove('error-shake');
+}, { once: true });
+}
+}
+
+// 4. Update Global Status
+updateGlobalStatus();
+}
+
+// Initialize button status on load
+document.addEventListener('DOMContentLoaded', () => {
+document.getElementById('processButton').disabled = true;
+updateGlobalStatus();
+});
+
+
+// --- Core Logic Functions (File Processing) ---
+
+/** Reads a file and returns its content as a string. */
+function readFileAsync(file) {
+return new Promise((resolve, reject) => {
+const reader = new FileReader();
+reader.onload = (event) => resolve(event.target.result);
+reader.onerror = (error) => reject(error);
+reader.readAsText(file);
+});
+}
+
+/** Parses CSV content and extracts a Set of unique ISINs. */
+function getIsinSet(content, isinIndex, skipRows = 1) {
+const isinSet = new Set();
+const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
+
+for (let i = skipRows; i < lines.length; i++) {
+const columns = lines[i].split(',');
+if (columns.length > isinIndex) {
+isinSet.add(columns[isinIndex].trim());
+}
+}
+return isinSet;
+}
+
+// --- Main Processing Function ---
+async function processFiles() {
+const button = document.getElementById('processButton');
+const buttonText = document.getElementById('buttonText');
+const statusMessage = document.getElementById('statusMessage');
+const resultMessage = document.getElementById('resultMessage');
+const progressBar = document.getElementById('progressBar');
+const progressBarContainer = document.getElementById('progressBarContainer');
+
+// --- Reset & Setup UI ---
+button.disabled = true;
+resultMessage.style.display = 'none';
+resultMessage.classList.remove('error');
+progressBarContainer.style.display = 'block';
+progressBar.style.width = '0%';
+progressBar.style.backgroundColor = varCss('--accent-color');
+
+
+try {
+// 1. Get File Objects
+const varFile = document.getElementById('varFile').files[0];
+const approvedScripFile = document.getElementById('approvedScripFile').files[0];
+const bhavCopyNseFile = document.getElementById('bhavCopyNseFile').files[0];
+const bhavCopyBseFile = document.getElementById('bhavCopyBseFile').files[0];
+
+if (!varFile || !approvedScripFile || !bhavCopyNseFile || !bhavCopyBseFile) {
+throw new Error("Missing required files.");
+}
+
+// 2. Read All Files Asynchronously with Progress
+buttonText.textContent = 'Reading files (1/4)';
+statusMessage.textContent = 'Reading source files...';
+progressBar.style.width = '10%';
+
+const [varContent, approvedContent, nseContent, bseContent] = await Promise.all([
+readFileAsync(varFile),
+readFileAsync(approvedScripFile),
+readFileAsync(bhavCopyNseFile),
+readFileAsync(bhavCopyBseFile),
+]);
+
+// 3. Prepare ISIN Lookup Sets
+buttonText.textContent = 'Building lookups (2/4)';
+statusMessage.textContent = 'Preparing ISIN comparison data...';
+progressBar.style.width = '30%';
+await new Promise(r => setTimeout(r, 200));
+
+const approvedIsins = getIsinSet(approvedContent, APPROVED_SCRIP_ISIN_INDEX, 1);
+const nseIsins = getIsinSet(nseContent, BHAVCOPY_ISIN_INDEX, 1);
+const bseIsins = getIsinSet(bseContent, BHAVCOPY_ISIN_INDEX, 1);
+
+// 4. Process the Var File
+buttonText.textContent = 'Applying Logic (3/4)';
+statusMessage.textContent = 'Executing VAR and BhavCopy cross-checks...';
+progressBar.style.width = '60%';
+await new Promise(r => setTimeout(r, 500));
+
+const varLines = varContent.split(/\r?\n/);
+const updatedLines = [];
+let modifiedCount = 0;
+
+// Keep the first row as-is
+if (varLines.length > 0) {
+updatedLines.push(varLines[0]);
+}
+
+// Process data rows
+for (let i = 1; i < varLines.length; i++) {
+const line = varLines[i];
+if (line.trim() === '') continue;
+
+let columns = line.split(',');
+
+if (columns.length > VAR_FILE_VAR_INDEX) {
+const isin = columns[VAR_FILE_ISIN_INDEX].trim();
+
+// Only process scrips that are in the MTF Approved list
+if (approvedIsins.has(isin)) {
+
+    let isModified = false; // Flag to track if we actually changed anything
+
+    // 1. Get Values
+    let colGValue = parseFloat(columns[VAR_FILE_MODIFY_INDEX]) || 0; // Column G
+    let colIValue = parseFloat(columns[VAR_FILE_COL_I_INDEX]) || 0;      // Column I
+
+    // 2. Perform Calculation (G + I)
+    let total = colGValue + colIValue;
+    columns[VAR_FILE_MODIFY_INDEX] = total.toFixed(2);
+
+    // Check: Agar Column I me kuch value thi (0 nahi thi), to modify mana jayega
+    if (colIValue !== 0) {
+        isModified = true;
     }
 
-                // 2. Perform Validation
-                if (requiredKeyword) {
-                    // Check if the filename (case-insensitive) contains the required keyword (case-insensitive)
-                    if (!filename.toLowerCase().includes(requiredKeyword.toLowerCase())) {
-                        isValid = false;
-                    }
-                }
+    // 3. BhavCopy Check (Safety Rule)
+    // Agar NSE ya BSE me nahi mila to override karke 100 kar do
+    if (!nseIsins.has(isin) || !bseIsins.has(isin)) {
+        columns[VAR_FILE_MODIFY_INDEX] = '100';
+        isModified = true; // Ye to definetely modification hai
+    }
 
-                if (isValid) {
-                    // 3a. Success Logic
-                    card.classList.add('complete');
-                    const span = document.createElement('span');
-                    span.classList.add('file-name-display');
-                    span.textContent = filename;
-                    card.appendChild(span);
-                } else {
-                    // 3b. Failure Logic (Shake and Error Message)
-                    fileInput.value = null; // Reject the file by clearing the input
-                    
-                    card.classList.add('error-shake');
-                    
-                    // Add error message as requested
-                    const errorSpan = document.createElement('span');
-                    errorSpan.classList.add('error-message');
-                    errorSpan.textContent = 'File Jo Bhai';
-                    card.appendChild(errorSpan);
-                    
-                    // Remove shake class after animation completes for re-use
-                    card.addEventListener('animationend', () => {
-                        card.classList.remove('error-shake');
-                    }, { once: true });
-                }
-            } 
-            
-            // 4. Update Global Status
-            updateGlobalStatus();
-        }
+    // 4. Update Counter only if actually modified
+    if (isModified) {
+        modifiedCount++;
+    }
 
-        // Initialize button status on load
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('processButton').disabled = true;
-            updateGlobalStatus();
-        });
+}
+}
+updatedLines.push(columns.join(','));
+}
 
+// 5. Generate Output File
+buttonText.textContent = 'Finalizing Download (4/4)';
+statusMessage.textContent = 'Processing complete. Generating file...';
+progressBar.style.width = '90%';
+await new Promise(r => setTimeout(r, 500));
 
-        // --- Core Logic Functions (File Processing) ---
+const updatedCsvContent = updatedLines.join('\r\n');
+const newFileName = varFile.name;
 
-        /** Reads a file and returns its content as a string. */
-        function readFileAsync(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (event) => resolve(event.target.result);
-                reader.onerror = (error) => reject(error);
-                reader.readAsText(file);
-            });
-        }
+// Trigger Download
+const blob = new Blob([updatedCsvContent], { type: 'text/csv;charset=utf-8;' });
+const link = document.createElement("a");
+const url = URL.createObjectURL(blob);
 
-        /** Parses CSV content and extracts a Set of unique ISINs. */
-        function getIsinSet(content, isinIndex, skipRows = 1) {
-            const isinSet = new Set();
-            const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
+link.setAttribute("href", url);
+link.setAttribute("download", newFileName);
+link.style.visibility = 'hidden';
 
-            for (let i = skipRows; i < lines.length; i++) {
-                const columns = lines[i].split(',');
-                if (columns.length > isinIndex) {
-                    isinSet.add(columns[isinIndex].trim());
-                }
-            }
-            return isinSet;
-        }
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
 
-        // --- Main Processing Function ---
-        async function processFiles() {
-            const button = document.getElementById('processButton');
-            const buttonText = document.getElementById('buttonText');
-            const statusMessage = document.getElementById('statusMessage');
-            const resultMessage = document.getElementById('resultMessage');
-            const progressBar = document.getElementById('progressBar');
-            const progressBarContainer = document.getElementById('progressBarContainer');
+// 6. Display Success
+progressBar.style.width = '100%';
+progressBar.style.backgroundColor = varCss('--success-color');
+statusMessage.textContent = 'SUCCESS! File generation complete.';
 
-            // --- Reset & Setup UI ---
-            button.disabled = true;
-            resultMessage.style.display = 'none';
-            resultMessage.classList.remove('error');
-            progressBarContainer.style.display = 'block';
-            progressBar.style.width = '0%';
-            progressBar.style.backgroundColor = varCss('--accent-color');
+resultMessage.innerHTML = `Operation Successful. The updated file *${newFileName}* has been downloaded.<br>Total Scrips Modified: *${modifiedCount}*`;
+resultMessage.style.display = 'block';
 
 
-            try {
-                // 1. Get File Objects
-                const varFile = document.getElementById('varFile').files[0];
-                const approvedScripFile = document.getElementById('approvedScripFile').files[0];
-                const bhavCopyNseFile = document.getElementById('bhavCopyNseFile').files[0];
-                const bhavCopyBseFile = document.getElementById('bhavCopyBseFile').files[0];
-
-                if (!varFile || !approvedScripFile || !bhavCopyNseFile || !bhavCopyBseFile) {
-                    throw new Error("Missing required files.");
-                }
-
-                // 2. Read All Files Asynchronously with Progress
-                buttonText.textContent = 'Reading files (1/4)';
-                statusMessage.textContent = 'Reading source files...';
-                progressBar.style.width = '10%';
-                
-                const [varContent, approvedContent, nseContent, bseContent] = await Promise.all([
-                    readFileAsync(varFile),
-                    readFileAsync(approvedScripFile),
-                    readFileAsync(bhavCopyNseFile),
-                    readFileAsync(bhavCopyBseFile),
-                ]);
-
-                // 3. Prepare ISIN Lookup Sets
-                buttonText.textContent = 'Building lookups (2/4)';
-                statusMessage.textContent = 'Preparing ISIN comparison data...';
-                progressBar.style.width = '30%';
-                await new Promise(r => setTimeout(r, 200)); 
-                
-                const approvedIsins = getIsinSet(approvedContent, APPROVED_SCRIP_ISIN_INDEX, 1);
-                const nseIsins = getIsinSet(nseContent, BHAVCOPY_ISIN_INDEX, 1);
-                const bseIsins = getIsinSet(bseContent, BHAVCOPY_ISIN_INDEX, 1);
-
-                // 4. Process the Var File
-                buttonText.textContent = 'Applying Logic (3/4)';
-                statusMessage.textContent = 'Executing VAR and BhavCopy cross-checks...';
-                progressBar.style.width = '60%';
-                await new Promise(r => setTimeout(r, 500)); 
-
-                const varLines = varContent.split(/\r?\n/);
-                const updatedLines = [];
-                let modifiedCount = 0;
-
-                // Keep the first row as-is
-                if (varLines.length > 0) {
-                    updatedLines.push(varLines[0]);
-                }
-
-                // Process data rows
-                for (let i = 1; i < varLines.length; i++) {
-                    const line = varLines[i];
-                    if (line.trim() === '') continue;
-
-                    let columns = line.split(',');
-                    
-                    if (columns.length > VAR_FILE_VAR_INDEX) {
-                        const isin = columns[VAR_FILE_ISIN_INDEX].trim();
-
-                        // Only process scrips that are in the MTF Approved list
-                        if (approvedIsins.has(isin)) {
-                            
-                            let shouldModify = false;
-
-                            // Rule 1: VAR Check (Column J > 65)
-                            const varValue = parseFloat(columns[VAR_FILE_VAR_INDEX]);
-                            if (varValue > VAR_THRESHOLD) {
-                                shouldModify = true;
-                            }
-
-                            // Rule 2: BhavCopy Check (ISIN not found in NSE or BSE)
-                            if (!nseIsins.has(isin) || !bseIsins.has(isin)) {
-                                shouldModify = true;
-                            }
-                            
-                            if (shouldModify) {
-                                // Apply modification: Set Column G (Index 6) to '100'
-                                columns[VAR_FILE_MODIFY_INDEX] = '100'; 
-                                modifiedCount++;
-                            }
-                        }
-                    }
-                    updatedLines.push(columns.join(','));
-                }
-
-                // 5. Generate Output File
-                buttonText.textContent = 'Finalizing Download (4/4)';
-                statusMessage.textContent = 'Processing complete. Generating file...';
-                progressBar.style.width = '90%';
-                await new Promise(r => setTimeout(r, 500)); 
-
-                const updatedCsvContent = updatedLines.join('\r\n');
-                const newFileName = varFile.name; 
-
-                // Trigger Download
-                const blob = new Blob([updatedCsvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                const url = URL.createObjectURL(blob);
-                
-                link.setAttribute("href", url);
-                link.setAttribute("download", newFileName);
-                link.style.visibility = 'hidden';
-                
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                // 6. Display Success
-                progressBar.style.width = '100%';
-                progressBar.style.backgroundColor = varCss('--success-color');
-                statusMessage.textContent = 'SUCCESS! File generation complete.';
-                
-                resultMessage.innerHTML = `Operation Successful. The updated file *${newFileName}* has been downloaded.<br>Total Scrips Modified: *${modifiedCount}*`;
-                resultMessage.style.display = 'block';
-
-
-            } catch (error) {
-                // Handle Error
-                statusMessage.textContent = 'Error during processing.';
-                resultMessage.classList.add('error');
-                resultMessage.innerHTML = `**Processing Failed.** <br>Error Details: ${error.message}`;
-                resultMessage.style.display = 'block';
-                progressBar.style.width = '100%';
-                progressBar.style.backgroundColor = varCss('--danger-color');
-            } finally {
-                // Reset UI
-                setTimeout(() => {
-                    // Re-run global status check
-                    updateGlobalStatus(); 
-                    buttonText.textContent = 'Process & Download Updated VAR File';
-                    progressBarContainer.style.display = 'none';
-                }, 1500);
-            }
-        }
-    </script>
+} catch (error) {
+// Handle Error
+statusMessage.textContent = 'Error during processing.';
+resultMessage.classList.add('error');
+resultMessage.innerHTML = `**Processing Failed.** <br>Error Details: ${error.message}`;
+resultMessage.style.display = 'block';
+progressBar.style.width = '100%';
+progressBar.style.backgroundColor = varCss('--danger-color');
+} finally {
+// Reset UI
+setTimeout(() => {
+// Re-run global status check
+updateGlobalStatus();
+buttonText.textContent = 'Process & Download Updated VAR File';
+progressBarContainer.style.display = 'none';
+}, 1500);
+}
+}
+</script>
 </body>
 </html>
