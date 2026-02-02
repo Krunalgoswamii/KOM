@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My One & Only HIMUU ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink: #ff85a1;
+            --dark-pink: #ff4d6d;
+            --bg-color: #fff0f3;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: var(--bg-color);
+            font-family: 'Quicksand', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Floating Hearts Background Animation */
+        .hearts-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .heart {
+            position: absolute;
+            color: var(--pink);
+            opacity: 0.6;
+            animation: float 6s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(255, 77, 109, 0.2);
+            text-align: center;
+            z-index: 10;
+            max-width: 400px;
+            width: 90%;
+            border: 2px solid white;
+            transition: all 0.5s ease;
+        }
+
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            color: var(--dark-pink);
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+        }
+
+        .gif-container img {
+            width: 180px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+            min-height: 100px; /* Space for growing button */
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #yesBtn {
+            background-color: var(--dark-pink);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 77, 109, 0.4);
+        }
+
+        #noBtn {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #ddd;
+        }
+
+        /* Success State */
+        .hidden { display: none; }
+        
+        #celebration {
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="hearts-bg" id="heartsBg"></div>
+
+    <div class="card" id="mainCard">
+        <div id="content">
+            <div class="gif-container">
+                <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpndWp3am8xb3R4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/c76IJLufpNUMo/giphy.gif" id="mainGif">
+            </div>
+            <h1>Will you be my Valentine, HIMUU? ❤️</h1>
+            <div class="btn-group">
+                <button id="yesBtn" onclick="celebrate()">YES</button>
+                <button id="noBtn" onmouseover="dodgeButton()" onclick="dodgeButton()">NO</button>
+            </div>
+        </div>
+
+        <div id="celebration" class="hidden">
+            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmpsZ3R4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/K7I5pA9kUqfHq/giphy.gif" style="width:200px; border-radius:20px;">
+            <h1>Yayyy! I knew it! 💖</h1>
+            <p style="color: #ff4d6d; font-weight: bold;">I love you to the moon and back, HIMUU! 💍✨</p>
+        </div>
+    </div>
+
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        // 1. Floating Hearts Background
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+            heart.style.animationDuration = Math.random() * 3 + 3 + 's';
+            document.getElementById('heartsBg').appendChild(heart);
+            setTimeout(() => heart.remove(), 6000);
+        }
+        setInterval(createHeart, 300);
+
+        // 2. Smart No Button
+        let yesSize = 1;
+        function dodgeButton() {
+            const noBtn = document.getElementById('noBtn');
+            const yesBtn = document.getElementById('yesBtn');
+            
+            // Move No Button
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = Math.random() * (window.innerHeight - 50);
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = x + 'px';
+            noBtn.style.top = y + 'px';
+
+            // Make Yes Button bigger and bigger!
+            yesSize += 0.2;
+            yesBtn.style.transform = `scale(${yesSize})`;
+            yesBtn.innerText = "YES! 😍";
+        }
+
+        // 3. Celebration logic
+        function celebrate() {
+            document.getElementById('content').classList.add('hidden');
+            document.getElementById('celebration').classList.remove('hidden');
+            document.getElementById('bgMusic').play();
+            
+            // Professional Confetti burst
+            const end = Date.now() + (5 * 1000);
+            const colors = ['#ff4d6d', '#ff85a1', '#ffffff'];
+
+            (function frame() {
+                confetti({
+                    particleCount: 3,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: colors
+                });
+                confetti({
+                    particleCount: 3,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: colors
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+    </script>
+</body>
+</html>
