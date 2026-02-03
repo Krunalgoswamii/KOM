@@ -6,47 +6,6 @@
     <title>SWING TRADING</title>
     <style>
 
-/* Mobile Optimization */
-@media (max-width: 768px) {
-    .header-section { flex-direction: column; align-items: stretch; gap: 15px; }
-    .filter-group { flex-direction: column; width: 100%; }
-    .input-panel { flex-direction: column; align-items: stretch; }
-    .btn-primary { width: 100%; }
-    .dashboard { grid-template-columns: 1fr 1fr; }
-    
-    /* Table ko Card mein badalne ka logic */
-    .table-wrap { border: none; background: transparent; }
-    table, thead, tbody, th, td, tr { display: block; }
-    thead tr { position: absolute; top: -9999px; left: -9999px; } /* Heading hide karo */
-    
-    tr { 
-        border: 1px solid var(--border); 
-        margin-bottom: 15px; 
-        border-radius: 10px; 
-        background: white; 
-        padding: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    
-    td { 
-        border: none; 
-        position: relative; 
-        padding-left: 50% !important; 
-        text-align: right; 
-        padding: 8px 10px !important;
-        border-bottom: 1px solid #f1f1f1;
-    }
-    
-    td:last-child { border-bottom: none; }
-
-    /* Label dikhane ke liye logic */
-    td:before {
-        position: absolute; left: 10px; width: 45%; 
-        padding-right: 10px; white-space: nowrap;
-        content: attr(data-label); font-weight: bold;
-        text-align: left; color: var(--text-light);
-    }
-}
         
         :root {
             --bg-color: #f8f9fa;
@@ -410,21 +369,20 @@ function importData(event) {
             sums.margin += c.myMargin; sums.loan += c.loan; sums.funding += c.interest;
 
             activeBody.innerHTML += `
-    <tr>
-        <td data-label="Date">${t.date}</td>
-        <td data-label="Client" style="color:var(--purple); font-weight:bold;">${t.client}</td>
-        <td data-label="Symbol"><b>${t.symbol}</b></td>
-        <td data-label="Qty">${t.qty}</td>
-        <td data-label="Value">₹${Math.round(c.totalVal).toLocaleString()}</td>
-        <td data-label="Margin" style="color:var(--orange); font-weight:bold;">₹${Math.round(c.myMargin).toLocaleString()}</td>
-        <td data-label="Loan">₹${Math.round(c.loan).toLocaleString()}</td>
-        <td data-label="Days">${c.days} d</td>
-        <td data-label="Interest" style="color:var(--red)">₹${Math.round(c.interest)}</td>
-        <td data-label="Action">
-            <button class="btn" style="background:white; border:1px solid var(--blue); color:var(--blue); padding:5px 10px; font-size:0.8rem;" onclick="editTrade(${t.id})">Edit</button>
-            <button class="btn" style="background:var(--red); color:white; padding:5px 10px;" onclick="openModal(${t.id})">Sell</button>
-        </td>
-    </tr>`;
+                <tr>
+                    <td>${t.date}</td>
+                    <td style="color:var(--purple); font-weight:bold;">${t.client}</td>
+                    <td><b>${t.symbol}</b></td>
+                    <td>${t.qty}</td>
+                    <td>₹${Math.round(c.totalVal).toLocaleString()}</td>
+                    <td style="color:var(--orange); font-weight:bold;">₹${Math.round(c.myMargin).toLocaleString()}</td>
+                    <td>₹${Math.round(c.loan).toLocaleString()}</td>
+                    <td>${c.days} d</td>
+                    <td style="color:var(--red)">₹${Math.round(c.interest)}</td>
+                    <button class="btn" style="background:white; border:1px solid var(--blue); color:var(--blue); padding:5px 10px; font-size:0.8rem;" onclick="editTrade(${t.id})">Edit</button>
+                    <td><button class="btn" style="background:var(--red); color:white; padding:5px 10px;" onclick="openModal(${t.id})">Sell</button></td>
+                </tr>`;
+        });
 
         const currentCap = filter === "COMBINED" ? (multiCapital.KRUNAL + multiCapital.DHAVAL) : multiCapital[filter];
         document.getElementById('dashAvailable').innerText = '₹' + Math.round(currentCap - sums.margin).toLocaleString();
@@ -462,15 +420,15 @@ function editTrade(id) {
             const cashBack = h.marginReleased + h.netPl;
             body.innerHTML += `
                 <tr>
-        <td data-label="Sell Date">${h.sellDate}</td>
-        <td data-label="Client">${h.client}</td>
-        <td data-label="Symbol"><b>${h.symbol}</b></td>
-        <td data-label="Qty">${h.qty}</td>
-        <td data-label="Interest" style="color:var(--red)">₹${Math.round(h.interest)}</td>
-        <td data-label="Net P&L" style="color:${h.netPl >= 0 ? 'var(--green)' : 'var(--red)'}; font-weight:bold;">₹${Math.round(h.netPl).toLocaleString()}</td>
-        <td data-label="Cash Back" class="col-cashback">₹${Math.round(cashBack).toLocaleString()}</td>
-        <td data-label="Action"><button onclick="undoHistory(${history.indexOf(h)})" style="border:none; background:none; color:var(--red); cursor:pointer;">Undo</button></td>
-    </tr>`;
+                    <td>${h.sellDate}</td>
+                    <td>${h.client}</td>
+                    <td><b>${h.symbol}</b></td>
+                    <td>${h.qty}</td>
+                    <td style="color:var(--red)">₹${Math.round(h.interest)}</td>
+                    <td style="color:${h.netPl >= 0 ? 'var(--green)' : 'var(--red)'}; font-weight:bold;">₹${Math.round(h.netPl).toLocaleString()}</td>
+                    <td class="col-cashback">₹${Math.round(cashBack).toLocaleString()}</td>
+                    <td><button onclick="undoHistory(${history.indexOf(h)})" style="border:none; background:none; color:var(--red); cursor:pointer;">Undo</button></td>
+                </tr>`;
         });
     }
 
