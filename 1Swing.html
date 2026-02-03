@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWING TRADING</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #343a40;
+            --text-light: #6c757d;
+            --border: #dee2e6;
+            --blue: #228be6; 
+            --green: #40c057; 
+            --red: #fa5252;   
+            --orange: #fd7e14; 
+            --purple: #7950f2;
+            --dark-blue: #1e3a8a;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* Header & Client Filter */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 25px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .filter-group { display: flex; gap: 20px; align-items: center; }
+
+        .capital-box {
+            background: #eef2ff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .capital-box input {
+            border: none;
+            background: transparent;
+            font-size: 1.2rem;
+            width: 130px;
+            font-weight: bold;
+            color: var(--blue);
+            text-align: right;
+        }
+
+        /* Dashboard */
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid var(--border); }
+        .card h4 { margin: 0 0 8px 0; color: var(--text-light); font-size: 0.85rem; }
+        .card .value { font-size: 1.6rem; font-weight: 700; }
+
+        /* Input Panel */
+        .input-panel {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 30px;
+        }
+        .field { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 140px; }
+        .field label { font-size: 0.8rem; font-weight: 600; color: var(--text-light); }
+        .field input, .field select { padding: 10px; border: 1px solid var(--border); border-radius: 5px; }
+        
+        .btn { padding: 11px 20px; border: none; border-radius: 5px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-primary { background: var(--blue); color: white; width: 200px; }
+
+        /* Tables */
+        .table-wrap { background: white; border-radius: 10px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 40px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f1f3f5; padding: 12px 15px; text-align: left; font-size: 0.8rem; }
+        td { padding: 12px 15px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+        
+        .col-cashback { font-weight: 800; background-color: #f0f4ff; color: var(--dark-blue); }
+
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: white; padding: 25px; border-radius: 10px; width: 350px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="header-section">
+        <div>
+            <h1 style="margin:0;">Swing Trading <span style="font-size:0.4em; color:var(--text-light);"></span></h1>
+        </div>
+
+<div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; background: #fff; padding: 15px; border-radius: 10px; border: 1px solid var(--border);">
+    <button class="btn" style="background: var(--purple); color: white;" onclick="exportData()">📥 Download Backup File</button>
+    
+    <label class="btn" style="background: var(--orange); color: white; cursor: pointer;">
+        📤 Upload Backup File
+        <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+    </label>
+</div>
+
+        <div class="filter-group">
+            <div class="field">
+                <label>Select Client Profile</label>
+                <select id="clientFilter" onchange="render()" style="font-weight:bold; border-color:var(--blue); color:var(--blue);">
+                    <option value="COMBINED">ALL (Combined View)</option>
+                    <option value="KRUNAL">KRUNAL</option>
+                    <option value="DHAVAL">DHAVAL</option>
+                </select>
+            </div>
+            <div class="capital-box">
+                <span id="capLabel">Deposit: ₹</span>
+                <input type="number" id="capitalInput" onchange="updateCapital()" onkeyup="updateCapital()">
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div class="card" style="border-left: 5px solid var(--green);">
+            <h4>Available Margin</h4>
+            <div class="value" id="dashAvailable">₹0</div>
+        </div>
+        <div class="card" style="border-left: 5px solid var(--orange);">
+            <h4>Used Margin</h4>
+            <div class="value" id="dashBlocked">₹0</div>
+        </div>
+        <div class="card" style="border-left: 5px solid var(--purple);">
+            <h4>Total Loan</h4>
+            <div class="value" id="dashLoan">₹0</div>
+        </div>
+        <div class="card" style="border-left: 5px solid var(--red);">
+            <h4>Interest (Unpaid)</h4>
+            <div class="value" id="dashFunding" style="color:var(--red)">₹0</div>
+        </div>
+    </div>
+
+    <div class="input-panel">
+        <div class="field">
+            <label>Buy Date</label>
+            <input type="date" id="date">
+        </div>
+        <div class="field">
+            <label>Symbol</label>
+            <input type="text" id="symbol" placeholder="e.g. RELIANCE">
+        </div>
+        <div class="field">
+            <label>Quantity</label>
+            <input type="number" id="qty" placeholder="0">
+        </div>
+        <div class="field">
+            <label>Buy Rate</label>
+            <input type="number" id="rate" placeholder="0">
+        </div>
+        <div class="field" style="max-width: 80px;">
+            <label>Margin %</label>
+            <input type="number" id="marginPct" value="25">
+        </div>
+        <div class="field" style="max-width: 80px;">
+            <label>Int. %</label>
+            <input type="number" id="intRate" value="18">
+        </div>
+        <button class="btn btn-primary" id="addBtn" onclick="addTrade()">+ Add Trade</button>
+    </div>
+
+    <h2 style="color: var(--blue);">Active Holdings</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Client</th>
+                    <th>Symbol</th>
+                    <th>Qty</th>
+                    <th>Total Value</th>
+                    <th>My Margin</th>
+                    <th>Broker Loan</th>
+                    <th>Days</th>
+                    <th>Funding</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="activeBody"></tbody>
+        </table>
+    </div>
+
+    <h2 style="color: var(--green);">Closed Trades (P&L)</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Sell Date</th>
+                    <th>Client</th>
+                    <th>Symbol</th>
+                    <th>Qty</th>
+                    <th>Funding Paid</th>
+                    <th>Net P&L</th>
+                    <th class="col-cashback">Total Cash Back</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="sellModal" class="modal">
+    <div class="modal-box">
+        <h3>Exit Position</h3>
+        <p id="mSymbol" style="font-weight:bold;"></p>
+        <div class="field" style="margin-bottom:10px"><label>Date</label><input type="date" id="mDate"></div>
+        <div class="field" style="margin-bottom:10px"><label>Qty</label><input type="number" id="mQty"></div>
+        <div class="field" style="margin-bottom:15px"><label>Sell Rate</label><input type="number" id="mRate"></div>
+        <button class="btn btn-primary" style="width:100%; background:var(--red);" onclick="confirmSell()">Confirm Exit</button>
+        <button class="btn" style="width:100%; margin-top:10px;" onclick="closeModal()">Cancel</button>
+    </div>
+</div>
+
+<script>
+    let trades = [];
+let history = [];
+let multiCapital = { KRUNAL: 0, DHAVAL: 0 };
+
+    const sheetURL = "https://script.google.com/macros/s/AKfycbyiKAY7G6i6lDixGe6TEeCG-uSsw3IRsgEXBrijHNNL6B6PMc1V6-D2gWMSHwXQFBJw/exec"; // Yaha apna URL dalein
+
+
+
+// Data Load karne ke liye (Jab page open ho)
+async function loadFromSheet() {
+    const response = await fetch(sheetURL);
+    const data = await response.json();
+    if (data.trades) {
+        trades = data.trades;
+        history = data.history;
+        multiCapital = data.capital;
+        render();
+    }
+}
+
+// Data Save karne ke liye (Jab trade add ya sell karein)
+async function saveToCloud() {
+    const data = { 
+        trades: trades, 
+        history: history, 
+        capital: multiCapital 
+    };
+    await fetch(sheetURL, {
+        method: 'POST',
+        mode: 'no-cors', 
+        body: JSON.stringify(data)
+    });
+}
+
+// Page load hote hi data mangwao
+window.onload = loadFromSheet;
+    
+    document.getElementById('date').valueAsDate = new Date();
+
+    function updateCapital() {
+        const filter = document.getElementById('clientFilter').value;
+        if(filter === "COMBINED") return;
+        multiCapital[filter] = parseFloat(document.getElementById('capitalInput').value) || 0;
+        saveToCloud('mtf_cap_v4', JSON.stringify(multiCapital));
+        render();
+    }
+
+function exportData() {
+    const data = {
+        trades: JSON.parse(localStorage.getItem('mtf_trades_v4')) || [],
+        history: JSON.parse(localStorage.getItem('mtf_history_v4')) || [],
+        capital: JSON.parse(localStorage.getItem('mtf_cap_v4')) || { KRUNAL: 0, DHAVAL: 0 }
+    };
+    
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "MTF_Backup_" + new Date().toLocaleDateString() + ".json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    alert("Backup file downloaded! Isse safe jagah rakhein.");
+}
+
+// 2. Backup file se data wapas load karna
+function importData(event) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            if(confirm("Kya aap backup load karna chahte hain? Purana data replace ho jayega.")) {
+                saveToCloud('mtf_trades_v4', JSON.stringify(importedData.trades));
+                saveToCloud('mtf_history_v4', JSON.stringify(importedData.history));
+                saveToCloud('mtf_cap_v4', JSON.stringify(importedData.capital));
+                
+                // Page refresh taaki naya data dikhe
+                location.reload();
+            }
+        } catch (err) {
+            alert("Galat file! Please sahi backup file select karein.");
+        }
+    };
+    reader.readAsText(event.target.files[0]);
+}
+
+    function addTrade() {
+        const client = document.getElementById('clientFilter').value;
+        if(client === "COMBINED") { alert("Please select KRUNAL or DHAVAL first!"); return; }
+
+        const fields = ['date', 'symbol', 'qty', 'rate', 'marginPct', 'intRate'];
+        const v = fields.map(id => document.getElementById(id).value);
+        if(v.some(x => !x)) { alert("Fill all fields"); return; }
+
+        trades.push({
+            id: Date.now(), client, date: v[0], symbol: v[1].toUpperCase(),
+            qty: parseFloat(v[2]), rate: parseFloat(v[3]), 
+            marginPct: parseFloat(v[4]), intRate: parseFloat(v[5])
+        });
+
+        saveToCloud('mtf_trades_v4', JSON.stringify(trades));
+        ['symbol', 'qty', 'rate'].forEach(id => document.getElementById(id).value = '');
+        render();
+    }
+
+    function calculate(t) {
+        const days = Math.max(1, Math.ceil(Math.abs(new Date() - new Date(t.date)) / (86400000)));
+        const totalVal = t.qty * t.rate;
+        const myMargin = totalVal * (t.marginPct / 100);
+        const loan = totalVal - myMargin;
+        const interest = (loan * (t.intRate / 100) * days) / 365;
+        return { totalVal, myMargin, loan, interest, days };
+    }
+
+    function render() {
+        const filter = document.getElementById('clientFilter').value;
+        const capInput = document.getElementById('capitalInput');
+        
+        // Capital Input Logic
+        if(filter === "COMBINED") {
+            capInput.value = multiCapital.KRUNAL + multiCapital.DHAVAL;
+            capInput.disabled = true;
+            document.getElementById('addBtn').disabled = true;
+            document.getElementById('addBtn').innerText = "Select Profile to Add";
+        } else {
+            capInput.value = multiCapital[filter];
+            capInput.disabled = false;
+            document.getElementById('addBtn').disabled = false;
+            document.getElementById('addBtn').innerText = "+ Add Trade for " + filter;
+        }
+
+        let sums = { margin: 0, loan: 0, funding: 0 };
+        const activeBody = document.getElementById('activeBody');
+        activeBody.innerHTML = '';
+
+        trades.filter(t => filter === "COMBINED" || t.client === filter).forEach(t => {
+            const c = calculate(t);
+            sums.margin += c.myMargin; sums.loan += c.loan; sums.funding += c.interest;
+
+            activeBody.innerHTML += `
+                <tr>
+                    <td>${t.date}</td>
+                    <td style="color:var(--purple); font-weight:bold;">${t.client}</td>
+                    <td><b>${t.symbol}</b></td>
+                    <td>${t.qty}</td>
+                    <td>₹${Math.round(c.totalVal).toLocaleString()}</td>
+                    <td style="color:var(--orange); font-weight:bold;">₹${Math.round(c.myMargin).toLocaleString()}</td>
+                    <td>₹${Math.round(c.loan).toLocaleString()}</td>
+                    <td>${c.days} d</td>
+                    <td style="color:var(--red)">₹${Math.round(c.interest)}</td>
+                    <button class="btn" style="background:white; border:1px solid var(--blue); color:var(--blue); padding:5px 10px; font-size:0.8rem;" onclick="editTrade(${t.id})">Edit</button>
+                    <td><button class="btn" style="background:var(--red); color:white; padding:5px 10px;" onclick="openModal(${t.id})">Sell</button></td>
+                </tr>`;
+        });
+
+        const currentCap = filter === "COMBINED" ? (multiCapital.KRUNAL + multiCapital.DHAVAL) : multiCapital[filter];
+        document.getElementById('dashAvailable').innerText = '₹' + Math.round(currentCap - sums.margin).toLocaleString();
+        document.getElementById('dashBlocked').innerText = '₹' + Math.round(sums.margin).toLocaleString();
+        document.getElementById('dashLoan').innerText = '₹' + Math.round(sums.loan).toLocaleString();
+        document.getElementById('dashFunding').innerText = '₹' + Math.round(sums.funding).toLocaleString();
+
+        renderHistory(filter);
+    }
+
+function editTrade(id) {
+    const t = trades.find(x => x.id === id);
+    
+    // Form mein data bharna
+    document.getElementById('date').value = t.date;
+    document.getElementById('symbol').value = t.symbol;
+    document.getElementById('qty').value = t.qty;
+    document.getElementById('rate').value = t.rate;
+    document.getElementById('marginPct').value = t.marginPct;
+    document.getElementById('intRate').value = t.intRate;
+    
+    // Trade ko list se delete karna taaki update par naya save ho
+    trades = trades.filter(x => x.id !== id);
+    saveToCloud('mtf_trades_v4', JSON.stringify(trades));
+    render();
+    
+    // Scroll to top taaki user ko dikhe ki data form mein aa gaya hai
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+    function renderHistory(filter) {
+        const body = document.getElementById('historyBody');
+        body.innerHTML = '';
+        history.filter(h => filter === "COMBINED" || h.client === filter).reverse().forEach((h, i) => {
+            const cashBack = h.marginReleased + h.netPl;
+            body.innerHTML += `
+                <tr>
+                    <td>${h.sellDate}</td>
+                    <td>${h.client}</td>
+                    <td><b>${h.symbol}</b></td>
+                    <td>${h.qty}</td>
+                    <td style="color:var(--red)">₹${Math.round(h.interest)}</td>
+                    <td style="color:${h.netPl >= 0 ? 'var(--green)' : 'var(--red)'}; font-weight:bold;">₹${Math.round(h.netPl).toLocaleString()}</td>
+                    <td class="col-cashback">₹${Math.round(cashBack).toLocaleString()}</td>
+                    <td><button onclick="undoHistory(${history.indexOf(h)})" style="border:none; background:none; color:var(--red); cursor:pointer;">Undo</button></td>
+                </tr>`;
+        });
+    }
+
+    let currentTradeId = null;
+    function openModal(id) {
+        currentTradeId = id;
+        const t = trades.find(x => x.id === id);
+        document.getElementById('mSymbol').innerText = t.symbol + " (Qty: " + t.qty + ")";
+        document.getElementById('mQty').value = t.qty;
+        document.getElementById('mDate').valueAsDate = new Date();
+        document.getElementById('sellModal').style.display = 'flex';
+    }
+
+    function closeModal() { document.getElementById('sellModal').style.display = 'none'; }
+
+    function confirmSell() {
+        const tIdx = trades.findIndex(x => x.id === currentTradeId);
+        const t = trades[tIdx];
+        const sq = parseFloat(document.getElementById('mQty').value);
+        const sr = parseFloat(document.getElementById('mRate').value);
+        const sd = document.getElementById('mDate').value;
+
+        if(!sq || !sr || sq > t.qty) return alert("Check inputs");
+
+        const days = Math.max(1, Math.ceil(Math.abs(new Date(sd) - new Date(t.date)) / 86400000));
+        const soldMargin = (sq * t.rate) * (t.marginPct/100);
+        const interest = ((sq * t.rate - soldMargin) * (t.intRate/100) * days) / 365;
+        const netPl = (sq * sr) - (sq * t.rate) - interest;
+
+        history.push({ client: t.client, symbol: t.symbol, qty: sq, sellDate: sd, interest, marginReleased: soldMargin, netPl });
+        
+        if(sq === t.qty) trades.splice(tIdx, 1);
+        else t.qty -= sq;
+
+        saveToCloud('mtf_trades_v4', JSON.stringify(trades));
+        saveToCloud('mtf_history_v4', JSON.stringify(history));
+        closeModal();
+        render();
+    }
+
+    function undoHistory(index) {
+        if(confirm("Restore this trade to active?")) {
+            const h = history.splice(index, 1)[0];
+            // Simple restore logic
+            trades.push({ id: Date.now(), client: h.client, date: h.sellDate, symbol: h.symbol, qty: h.qty, rate: 0, marginPct: 25, intRate: 18 });
+            saveToCloud('mtf_trades_v4', JSON.stringify(trades));
+            saveToCloud('mtf_history_v4', JSON.stringify(history));
+            render();
+        }
+    }
+
+    loadFromCloud();
+</script>
+</body>
+</html>
