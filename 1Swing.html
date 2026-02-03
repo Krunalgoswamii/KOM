@@ -27,6 +27,15 @@
         font-weight: bold; text-align: left; color: var(--text-light);
     }
 }
+
+        .table-wrap {
+    overflow-x: auto; /* Isse mobile mein table ke neeche scroll bar aa jayega */
+    -webkit-overflow-scrolling: touch;
+}
+
+table {
+    min-width: 800px; /* Isse table mobile mein pichkega nahi, apni jagah lega */
+}
         
         :root {
             --bg-color: #f8f9fa;
@@ -506,3 +515,4 @@ function editTrade(id) {
 </body>
 
 </html>
+
