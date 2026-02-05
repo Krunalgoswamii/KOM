@@ -1,0 +1,183 @@
+HD
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eraser the Distance | Himuu ❤️</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;600&display=swap');
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #1a0a0d;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            touch-action: none; /* Crucial for drag */
+        }
+
+        #game-zone {
+            position: relative;
+            width: 100vw;
+            height: 70vh;
+        }
+
+        .avatar {
+            position: absolute;
+            font-size: 50px;
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.1s;
+        }
+
+        #me { top: 20%; left: 10%; }
+        #himuu { bottom: 20%; right: 10%; }
+
+        .line-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 10%;
+            font-size: 1.1rem;
+            color: #ff80ab;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        /* The Big Hug Reveal */
+        #reveal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 64, 129, 0.95);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: warmUp 1s forwards;
+        }
+
+        @keyframes warmUp {
+            from { opacity: 0; background: #1a0a0d; }
+            to { opacity: 1; background: rgba(255, 64, 129, 0.95); }
+        }
+
+        .big-hug-gif {
+            font-size: 150px;
+            animation: squish 1.5s infinite;
+        }
+
+        @keyframes squish {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .final-msg {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            margin-top: 20px;
+            padding: 0 20px;
+        }
+
+        .ldr-note {
+            margin-top: 15px;
+            font-size: 1rem;
+            max-width: 300px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-zone">
+        <div class="line-text">Himuu, humare beech ki distance mita do... <br> <b>Mere emoji ko drag karke apne paas lao! 🫂</b></div>
+        
+        <div id="me" class="avatar">🙋‍♂️</div>
+        <div id="himuu" class="avatar">🙋‍♀️</div>
+    </div>
+
+    <div id="reveal-overlay">
+        <div class="big-hug-gif">🫂</div>
+        <div class="final-msg">Happy Hug Day, Himuu!</div>
+        <p class="ldr-note">
+            "Distance ne humein door kiya hai, par ye virtual hug humein hamesha saath rakhega. Jaldi milke isse real banate hain!"
+        </p>
+        <div style="font-size: 40px; margin-top: 10px;">💖✨🧿</div>
+    </div>
+
+    <script>
+        const me = document.getElementById('me');
+        const himuu = document.getElementById('himuu');
+        const overlay = document.getElementById('reveal-overlay');
+        
+        let isDragging = false;
+
+        // Mouse & Touch Events
+        me.addEventListener('mousedown', startDrag);
+        me.addEventListener('touchstart', startDrag);
+
+        window.addEventListener('mousemove', drag);
+        window.addEventListener('touchmove', drag);
+
+        window.addEventListener('mouseup', endDrag);
+        window.addEventListener('touchend', endDrag);
+
+        function startDrag(e) {
+            isDragging = true;
+            me.style.cursor = 'grabbing';
+        }
+
+        function endDrag() {
+            isDragging = false;
+            me.style.cursor = 'grab';
+            checkCollision();
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+
+            let x, y;
+            if (e.type === 'touchmove') {
+                x = e.touches[0].clientX;
+                y = e.touches[0].clientY;
+            } else {
+                x = e.clientX;
+                y = e.clientY;
+            }
+
+            // Adjust position so emoji stays under finger
+            me.style.left = (x - 25) + 'px';
+            me.style.top = (y - 25) + 'px';
+
+            checkCollision();
+        }
+
+        function checkCollision() {
+            const meRect = me.getBoundingClientRect();
+            const himuuRect = himuu.getBoundingClientRect();
+
+            // Calculate distance between centers
+            const dist = Math.hypot(
+                (meRect.x + meRect.width/2) - (himuuRect.x + himuuRect.width/2),
+                (meRect.y + meRect.height/2) - (himuuRect.y + himuuRect.height/2)
+            );
+
+            if (dist < 60) {
+                isDragging = false;
+                showHug();
+            }
+        }
+
+        function showHug() {
+            overlay.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
