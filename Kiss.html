@@ -1,0 +1,167 @@
+KD
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic Kiss for Himuu 💋</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;600&display=swap');
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #0f0f0f;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            touch-action: none;
+        }
+
+        /* Initial Screen */
+        #sensor-container {
+            z-index: 10;
+        }
+
+        .target-circle {
+            width: 150px;
+            height: 150px;
+            border: 2px dashed #ff4081;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            position: relative;
+            cursor: pointer;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 64, 129, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(255, 64, 129, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 64, 129, 0); }
+        }
+
+        .instruction {
+            color: #ff80ab;
+            font-size: 1.1rem;
+            padding: 0 30px;
+            line-height: 1.6;
+        }
+
+        /* Kiss Prints */
+        .kiss-print {
+            position: absolute;
+            font-size: 40px;
+            pointer-events: none;
+            z-index: 5;
+            animation: popOut 1s ease-out forwards;
+        }
+
+        @keyframes popOut {
+            0% { transform: scale(0) rotate(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: scale(1.5) rotate(20deg); opacity: 0; }
+        }
+
+        /* Final Reveal */
+        #reveal-card {
+            display: none;
+            width: 85%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 40px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 64, 129, 0.3);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h1 { font-family: 'Dancing Script', cursive; color: #ff4081; font-size: 2.8rem; margin: 0; }
+        .msg { font-size: 1rem; line-height: 1.7; margin-top: 20px; color: #eee; }
+        .footer-line { color: #ff80ab; font-weight: bold; margin-top: 20px; display: block;}
+
+    </style>
+</head>
+<body>
+
+    <div id="sensor-container">
+        <p class="instruction">LDR hai toh kya hua, Magic toh ho sakta hai... ✨</p>
+        <div class="target-circle" id="target" onmousedown="handleTouch(event)" ontouchstart="handleTouch(event)">
+            <span style="font-size: 50px;">😘</span>
+        </div>
+        <p class="instruction" style="font-size: 0.9rem; opacity: 0.8;"><b>Yaha apni finger 2 second ke liye hold karo!</b></p>
+    </div>
+
+    <div id="reveal-card">
+        <h1>Happy Kiss Day, Himuu! 💋</h1>
+        <div style="font-size: 50px; margin-top: 10px;">💏✨</div>
+        <p class="msg">
+            Pata hai ye screen touch karna real kiss jaisa nahi hai, <br>
+            par har bar jab tum ise touch karti ho, <br>
+            <b>mere dil ki dhadkan tum tak pahuchti hai!</b> ❤️
+        </p>
+        <span class="footer-line">Keep this virtual kiss until I give you a real one! 😉💋</span>
+        <div style="margin-top: 15px; font-size: 30px;">🧿💖🏆</div>
+    </div>
+
+    <script>
+        let holdTimer;
+        const target = document.getElementById('target');
+        const sensorBox = document.getElementById('sensor-container');
+        const card = document.getElementById('reveal-card');
+
+        function handleTouch(e) {
+            // Create a few kiss particles on touch
+            for(let i=0; i<5; i++) {
+                setTimeout(createKiss, i * 150);
+            }
+
+            // Start timer for reveal
+            holdTimer = setTimeout(() => {
+                showSuccess();
+            }, 2000);
+
+            // Cancel if touch ends
+            window.onmouseup = window.ontouchend = () => {
+                clearTimeout(holdTimer);
+            };
+        }
+
+        function createKiss() {
+            const kiss = document.createElement('div');
+            kiss.className = 'kiss-print';
+            kiss.innerHTML = '💋';
+            
+            // Random position near the target
+            const x = window.innerWidth / 2 + (Math.random() * 200 - 100);
+            const y = window.innerHeight / 2 + (Math.random() * 200 - 100);
+            
+            kiss.style.left = x + 'px';
+            kiss.style.top = y + 'px';
+            document.body.appendChild(kiss);
+            
+            setTimeout(() => kiss.remove(), 1000);
+        }
+
+        function showSuccess() {
+            sensorBox.style.display = 'none';
+            card.style.display = 'block';
+            document.body.style.background = "radial-gradient(circle, #3d0516, #0f0f0f)";
+            
+            // Continuous kisses in background
+            setInterval(createKiss, 500);
+        }
+    </script>
+</body>
+</html>
