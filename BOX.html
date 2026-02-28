@@ -3,8 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Box Cricket Pro Scorer</title>
+<title>Box Cricket</title>
 <style>
+
+    .super-over-active { 
+    background: linear-gradient(45deg, #f59e0b, #ef4444) !important; 
+    color: white !important;
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+#so-badge { 
+    display: none; background: #ef4444; color: white; padding: 2px 10px; 
+    border-radius: 20px; font-size: 12px; margin-bottom: 5px; 
+}
 :root { --primary: #00ff88; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #6366f1; }
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 10px; display: flex; flex-direction: column; align-items: center; }
 .container { width: 100%; max-width: 500px; background: var(--card); border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); border: 1px solid #334155; margin-bottom: 20px; }
@@ -57,7 +68,7 @@ Overs: <input type="number" id="max-overs" value="5" style="width:60px">
 </div>
 <button class="btn btn-primary" onclick="startInnings()">START INNINGS ⚡</button>
 </div>
-
+<div id="so-badge">SUPER OVER RUNNING</div>
 <div id="game-screen" class="container" style="display:none;">
 <div id="target-div" style="text-align:center; color:var(--primary); font-weight:bold; display:none"></div>
 <div style="text-align:center">
@@ -103,7 +114,14 @@ Bowler: <select id="live-bowler" onchange="changeBowler()" style="width:auto; ma
 </div>
 </div>
 
-
+<div id="bowler-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000;">
+    <div class="container" style="margin-top:20%; border:2px solid var(--accent)">
+        <h3>Select Next Bowler</h3>
+        <select id="modal-bowler-select"></select>
+        <button id="so-btn" class="btn" style="background:#f59e0b; color:black; margin-bottom:10px;" onclick="enableSuperOver()">START AS SUPER OVER ⚡</button>
+        <button class="btn btn-primary" style="background:var(--accent); color:white" onclick="confirmNewBowler()">CONFIRM BOWLER</button>
+    </div>
+</div>
 
 <div id="wkt-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000;">
 <div class="container" style="margin-top:20%; border:2px solid var(--primary)">
@@ -128,7 +146,14 @@ Bowler: <select id="live-bowler" onchange="changeBowler()" style="width:auto; ma
 </div>
 
 <script>
-let state = { runs:0, wkts:0, balls:0, inn:1, maxOvers:5, t1Name:"", t2Name:"", t1P:[], t2P:[], target:null };
+let state = { 
+    runs:0, wkts:0, balls:0, inn:1, maxOvers:5, t1Name:"", t2Name:"", t1P:[], t2P:[], target:null,
+    isSuperOver: false,
+    inn1SOConsumed: false,
+    inn2SOConsumed: false,
+    soRuns: 0,
+    soWkts: 0
+};
 let inn1Data = { bat:[], bowl:{} }, inn2Data = { bat:[], bowl:{} };
 let p1, p2, striker, currentBowler, lastBowler = "", history = [];
 
@@ -136,6 +161,17 @@ function addField(id, cls) {
 let input = document.createElement('input');
 input.className = cls; input.placeholder = "Player Name";
 document.getElementById(id).appendChild(input);
+}
+
+function enableSuperOver() {
+    let consumed = (state.inn === 1) ? state.inn1SOConsumed : state.inn2SOConsumed;
+    if(consumed) {
+        alert("Super Over is inning mein pehle hi use ho chuka hai!");
+        return;
+    }
+    state.isSuperOver = true;
+    document.getElementById('so-btn').classList.add('super-over-active');
+    document.getElementById('so-btn').innerText = "SUPER OVER SELECTED!";
 }
 
 function goToSelection() {
@@ -163,45 +199,80 @@ document.getElementById('b-select').innerHTML = bowlOpt;
 }
 
 function startInnings() {
-let s = document.getElementById('s-select').value;
-let ns = document.getElementById('ns-select').value;
-if(s === ns) return alert("Select different players!");
-p1 = { name: s, r:0, b:0, out:false };
-p2 = { name: ns, r:0, b:0, out:false };
-striker = p1;
-currentBowler = document.getElementById('b-select').value;
-lastBowler = "";
-updateBowlerList();
-document.getElementById('selection-screen').style.display = 'none';
-document.getElementById('game-screen').style.display = 'block';
-updateUI();
+    let s = document.getElementById('s-select').value;
+    let ns = document.getElementById('ns-select').value;
+    let b = document.getElementById('b-select').value; // Opening bowler
+    if(s === ns) return alert("Select different players!");
+    
+    p1 = { name: s, r:0, b:0, out:false };
+    p2 = { name: ns, r:0, b:0, out:false };
+    striker = p1;
+    currentBowler = b; // Shuruat wala bowler set karein
+    lastBowler = "";
+    
+    updateBowlerList(); // List update karein
+    document.getElementById('live-bowler').value = b; // Dropdown mein naam dikhayein
+    
+    document.getElementById('selection-screen').style.display = 'none';
+    document.getElementById('game-screen').style.display = 'block';
+    updateUI();
 }
 
 function updateBowlerList() {
-let bowlSquad = (state.inn === 1) ? state.t2P : state.t1P;
-// Over finish hone par wahi bowler nahi dikhna chahiye
-let availableBowlers = bowlSquad.filter(b => b !== lastBowler);
-document.getElementById('live-bowler').innerHTML = availableBowlers.map(p => `<option value="${p}">${p}</option>`).join('');
-document.getElementById('live-bowler').value = currentBowler;
+    let bowlSquad = (state.inn === 1) ? state.t2P : state.t1P;
+    let availableBowlers = bowlSquad.filter(b => b !== lastBowler);
+    
+    let options = `<option value="">-- Select Bowler --</option>`;
+    options += availableBowlers.map(p => `<option value="${p}">${p}</option>`).join('');
+    
+    document.getElementById('live-bowler').innerHTML = options;
+    document.getElementById('live-bowler').value = ""; // Default empty
 }
 
 function addBall(r) {
-save();
-state.runs += r; state.balls++; striker.r += r; striker.b++;
-recordBowl(r, 1, 0);
-if(r%2 !== 0) swap();
-if(state.balls % 6 === 0 && state.balls > 0) {
-alert("Over Complete! Please change the bowler.");
-lastBowler = currentBowler;
-swap();
-updateBowlerList();
-currentBowler = document.getElementById('live-bowler').value;
-}
-checkInningsEnd();
-updateUI();
-}
+    if (!currentBowler) { showBowlerModal(); return; }
+    save();
+    
+    state.runs += r; 
+    
+    // LIVE UPDATE LOGIC
+    if(state.isSuperOver) {
+        state.soRuns += r;
+        // Super over rule apply: score mein (r * 2) hona chahiye, 
+        // 1x r pehle hi add ho chuka hai, toh 1x r aur add kar rahe hain.
+        state.runs += r; 
+    }
 
-function addExtra() { save(); state.runs++; recordBowl(1, 0, 0); updateUI(); checkInningsEnd(); }
+    state.balls++; 
+    striker.r += r; 
+    striker.b++;
+    recordBowl(r, 1, 0);
+    
+    if(r%2 !== 0) swap();
+    
+    if(state.balls % 6 === 0 && state.balls > 0) {
+        if(state.isSuperOver) {
+            // Super over khatam hone par sirf flag reset karein
+            state.isSuperOver = false;
+            document.getElementById('so-badge').style.display = 'none';
+            alert(`Super Over Samapt! \nNet Score Updated Live.`);
+        }
+        lastBowler = currentBowler;
+        currentBowler = "";
+        swap();
+        showBowlerModal();
+        document.getElementById('so-btn').classList.remove('super-over-active');
+        document.getElementById('so-btn').innerText = "START AS SUPER OVER ⚡";
+    }
+    updateUI();
+    checkInningsEnd();
+}
+function addExtra() { 
+    if (!currentBowler || currentBowler === "") {
+    alert("Kripya pehle naya bowler select karein!");
+    return;
+}
+    save(); state.runs++; recordBowl(1, 0, 0); updateUI(); checkInningsEnd(); }
 
 function recordBowl(r, b, w) {
 let data = (state.inn === 1) ? inn1Data.bowl : inn2Data.bowl;
@@ -212,25 +283,57 @@ data[currentBowler].r += r; data[currentBowler].b += b; data[currentBowler].w +=
 function swap() { striker = (striker === p1) ? p2 : p1; }
 
 function takeWicket() {
-save();
-state.wkts++; striker.b++;
-recordBowl(0, 1, 1);
-let data = (state.inn === 1) ? inn1Data : inn2Data;
+    if (!currentBowler || currentBowler === "") { alert("Bowler select karein!"); return; }
+    save();
+    
+    state.wkts++; 
+    state.balls++; 
+    striker.b++;   
 
-// Add current striker to "Out" list
-data.bat.push({...striker, out:true});
+    // LIVE UPDATE FOR WICKET IN SUPER OVER
+    if(state.isSuperOver) {
+        state.soWkts += 1;
+        state.runs -= 5; // Direct -5 penalty
+    }
 
-let squad = (state.inn === 1) ? state.t1P : state.t2P;
-let outNames = data.bat.map(p => p.name);
-let available = squad.filter(p => !outNames.includes(p) && p !== p1.name && p !== p2.name);
+    recordBowl(0, 1, 1);
+    
+    let data = (state.inn === 1) ? inn1Data : inn2Data;
+    data.bat.push({...striker, out:true});
 
-if(state.wkts >= squad.length - 1 || available.length === 0) {
-checkInningsEnd(true);
-} else {
-document.getElementById('next-player-select').innerHTML = available.map(p => `<option value="${p}">${p}</option>`).join('');
-document.getElementById('wkt-modal').style.display = 'block';
+    if(state.balls % 6 === 0 && state.balls > 0) {
+        if(state.isSuperOver) {
+            state.isSuperOver = false;
+            document.getElementById('so-badge').style.display = 'none';
+        }
+        lastBowler = currentBowler;
+        currentBowler = "";
+    }
+
+    let squad = (state.inn === 1) ? state.t1P : state.t2P;
+    let outNames = data.bat.map(p => p.name);
+    let available = squad.filter(p => !outNames.includes(p) && p !== p1.name && p !== p2.name);
+
+    if(state.wkts >= squad.length - 1 || available.length === 0) {
+        if(state.isSuperOver) applySuperOverLogic();
+        checkInningsEnd(true);
+    } else {
+        document.getElementById('next-player-select').innerHTML = available.map(p => `<option value="${p}">${p}</option>`).join('');
+        document.getElementById('wkt-modal').style.display = 'block';
+    }
+    
+    updateUI(); // Scoreboard turant update karne ke liye
+    checkInningsEnd(); // Match end check karne ke liye
 }
+function applySuperOverLive(runsInBall, wicketsInBall) {
+    if (state.isSuperOver) {
+        // Super over ka impact calculate karein: (Runs * 2) - (Wkts * 5)
+        let impact = (runsInBall * 2) - (wicketsInBall * 5);
+        state.runs += (impact - runsInBall); // Original run already add ho chuka hota hai, isliye balance adjust karein
+    }
 }
+
+
 function manualSwap() {
     save(); // Taki galti se dab jaye toh undo kar sakein
     swap();
@@ -370,13 +473,49 @@ document.getElementById('bowl-body').innerHTML = bowlHtml;
 }
 
 function changeBowler() {
-if(document.getElementById('live-bowler').value === lastBowler) {
-alert("Same bowler cannot bowl consecutive overs!");
-updateBowlerList();
-return;
+    let selectedBowler = document.getElementById('live-bowler').value;
+    
+    if(selectedBowler === lastBowler) {
+        alert("Same bowler lagatar do over nahi daal sakta!");
+        document.getElementById('live-bowler').value = ""; // Selection reset karein
+        currentBowler = "";
+        return;
+    }
+    
+    currentBowler = selectedBowler;
 }
-currentBowler = document.getElementById('live-bowler').value;
+
+function showBowlerModal() {
+    let bowlSquad = (state.inn === 1) ? state.t2P : state.t1P;
+    let availableBowlers = bowlSquad.filter(b => b !== lastBowler);
+    
+    document.getElementById('modal-bowler-select').innerHTML = availableBowlers.map(p => `<option value="${p}">${p}</option>`).join('');
+    document.getElementById('bowler-modal').style.display = 'block';
 }
+
+function confirmNewBowler() {
+    let b = document.getElementById('modal-bowler-select').value;
+    if(!b) return alert("Bowler select karein!");
+    
+    currentBowler = b;
+    
+    // Check if Super Over was selected
+    if(state.isSuperOver) {
+        document.getElementById('so-badge').style.display = 'inline-block';
+        state.soRuns = 0;
+        state.soWkts = 0;
+        if(state.inn === 1) state.inn1SOConsumed = true;
+        else state.inn2SOConsumed = true;
+    } else {
+        document.getElementById('so-badge').style.display = 'none';
+    }
+
+    updateBowlerList();
+    document.getElementById('live-bowler').value = b;
+    document.getElementById('bowler-modal').style.display = 'none';
+    updateUI();
+}
+
 function save() { history.push(JSON.stringify({state:JSON.parse(JSON.stringify(state)), p1:JSON.parse(JSON.stringify(p1)), p2:JSON.parse(JSON.stringify(p2)), isP1:striker===p1, currentBowler, lastBowler, inn1Data:JSON.parse(JSON.stringify(inn1Data)), inn2Data:JSON.parse(JSON.stringify(inn2Data))})); }
 function undo() { if(history.length > 0) { let l = JSON.parse(history.pop()); state=l.state; p1=l.p1; p2=l.p2; striker=l.isP1?p1:p2; currentBowler=l.currentBowler; lastBowler=l.lastBowler; inn1Data=l.inn1Data; inn2Data=l.inn2Data; updateUI(); } }
 </script>
