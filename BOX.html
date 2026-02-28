@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Box Cricket</title>
+<title>Box Cricket by KD</title>
 <style>
 
     .super-over-active { 
@@ -45,28 +45,28 @@ input, select { background: #1e293b; border: 1px solid #475569; color: white; pa
 <h2 style="text-align:center; color:var(--primary)">Team Entry</h2>
 <div class="team-section">
 <input type="text" id="t1-name" value="Team A">
-<div id="t1-list"><input type="text" class="t1-p" value="Player 1"><input type="text" class="t1-p" value="Player 2"></div>
+<div id="t1-list"><input type="text" class="t1-p" value=""><input type="text" class="t1-p" value=""></div>
 <button class="btn" style="background:#334155; color:var(--primary)" onclick="addField('t1-list', 't1-p')">+ Add Player</button>
 </div>
 <div class="team-section">
 <input type="text" id="t2-name" value="Team B">
-<div id="t2-list"><input type="text" class="t2-p" value="Player 1"><input type="text" class="t2-p" value="Player 2"></div>
+<div id="t2-list"><input type="text" class="t2-p" value=""><input type="text" class="t2-p" value=""></div>
 <button class="btn" style="background:#334155; color:var(--primary)" onclick="addField('t2-list', 't2-p')">+ Add Player</button>
 </div>
 <div style="text-align:center">
 Overs: <input type="number" id="max-overs" value="5" style="width:60px">
-<button class="btn btn-primary" onclick="goToSelection()">NEXT: SELECT OPENERS</button>
+<button class="btn btn-primary" onclick="goToSelection()">NEXT</button>
 </div>
 </div>
 
 <div id="selection-screen" class="container" style="display:none;">
 <h2 id="sel-title" style="color:var(--accent); text-align:center">Innings Setup</h2>
 <div class="team-section">
-<label>Striker:</label><select id="s-select"></select>
+<label>Opener:</label><select id="s-select"></select>
 <label>Non-Striker:</label><select id="ns-select"></select>
 <label>Opening Bowler:</label><select id="b-select"></select>
 </div>
-<button class="btn btn-primary" onclick="startInnings()">START INNINGS ⚡</button>
+<button class="btn btn-primary" onclick="startInnings()">START MATCH</button>
 </div>
 <div id="so-badge">SUPER OVER RUNNING</div>
 <div id="game-screen" class="container" style="display:none;">
