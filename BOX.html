@@ -37,6 +37,12 @@ input, select { background: #1e293b; border: 1px solid #475569; color: white; pa
 .stats-table th { text-align: left; color: #888; border-bottom: 1px solid #334155; padding: 5px; }
 .stats-table td { padding: 8px 5px; border-bottom: 1px solid #1e293b; }
 .section-head { color: var(--primary); font-size: 12px; margin-top: 15px; font-weight: bold; }
+#winner-modal .container {
+    max-width: 95%; /* Mobile par full width dikhe */
+    max-height: 90vh; /* Screen se bahar na jaye */
+    overflow-y: auto;
+}
+
 </style>
 </head>
 <body>
@@ -62,7 +68,7 @@ Overs: <input type="number" id="max-overs" value="5" style="width:60px">
 <div id="selection-screen" class="container" style="display:none;">
 <h2 id="sel-title" style="color:var(--accent); text-align:center">Innings Setup</h2>
 <div class="team-section">
-<label>Opener:</label><select id="s-select"></select>
+<label>Striker:</label><select id="s-select"></select>
 <label>Non-Striker:</label><select id="ns-select"></select>
 <label>Opening Bowler:</label><select id="b-select"></select>
 </div>
@@ -378,12 +384,11 @@ finishMatch(msg);
 
 function finishMatch(msg) {
     if(state.inn === 2) {
-        // Current players ka data push karein scorecard ke liye
+        // Current players ka data final list mein add karein agar pehle se nahi hai
         if(!inn2Data.bat.find(x => x.name === p1.name)) inn2Data.bat.push({...p1, out:false});
         if(!inn2Data.bat.find(x => x.name === p2.name)) inn2Data.bat.push({...p2, out:false});
     }
 
-    // Winner team ka naam nikalne ke liye logic
     let winner = "";
     if (state.runs >= state.target) {
         winner = state.t2Name;
@@ -393,25 +398,28 @@ function finishMatch(msg) {
         winner = state.t1Name;
     }
 
-    // Modal mein data bharna
     document.getElementById('winner-team-name').innerText = winner === "MATCH DRAW" ? "TIE! 🤝" : "👑 " + winner.toUpperCase() + " WINS!";
     document.getElementById('victory-msg').innerText = msg;
     
-    // Dono innings ki summary taiyar karna
-    let statsHtml = `
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left;">
-            <div class="team-section">
+    // YAHAN BADLAV HAI: 
+    // Pehle summary dikhayenge, phir scorecard table
+    let summaryHtml = `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:left; margin-bottom:15px;">
+            <div class="team-section" style="margin-bottom:0">
                 <h4 style="color:var(--primary); margin:0">${state.t1Name}</h4>
-                <p style="font-size:20px; font-weight:bold; margin:5px 0;">${inn1Data.totalRuns || state.target - 1}/${inn1Data.wkts || 'All Out'}</p>
+                <p style="font-size:18px; font-weight:bold; margin:5px 0;">${inn1Data.totalRuns || 0}/${inn1Data.wkts || 0}</p>
             </div>
-            <div class="team-section">
+            <div class="team-section" style="margin-bottom:0">
                 <h4 style="color:var(--accent); margin:0">${state.t2Name}</h4>
-                <p style="font-size:20px; font-weight:bold; margin:5px 0;">${state.runs}/${state.wkts}</p>
+                <p style="font-size:18px; font-weight:bold; margin:5px 0;">${state.runs}/${state.wkts}</p>
             </div>
         </div>
     `;
+
+    // Dono ko jod kar modal mein daalein
+    let fullScorecardHtml = generateFullScorecard();
+    document.getElementById('final-stats-content').innerHTML = summaryHtml + fullScorecardHtml;
     
-    document.getElementById('final-stats-content').innerHTML = statsHtml;
     document.getElementById('winner-modal').style.display = 'block';
 }
 
@@ -516,6 +524,41 @@ function confirmNewBowler() {
     updateUI();
 }
 
+function generateFullScorecard() {
+    let html = "";
+    [1, 2].forEach(n => {
+        let data = (n === 1) ? inn1Data : inn2Data;
+        let teamName = (n === 1) ? state.t1Name : state.t2Name;
+        let total = (n === 1) ? (inn1Data.totalRuns || 0) : state.runs;
+        let wkts = (n === 1) ? (inn1Data.wkts || 0) : state.wkts;
+
+        html += `
+            <div style="margin-top:15px; border:1px solid #334155; padding:10px; border-radius:12px; background:#0f172a; text-align:left;">
+                <h3 style="color:var(--primary); margin:0; font-size:16px; border-bottom:1px solid #334155; padding-bottom:5px;">${teamName} Innings</h3>
+                <div class="section-head" style="margin-top:10px">BATTING</div>
+                <table class="stats-table">
+                    <thead><tr><th>Batsman</th><th>R</th><th>B</th><th>SR</th></tr></thead>
+                    <tbody>
+                        ${data.bat.map(p => `<tr><td>${p.name}${p.out?'':'*'}</td><td>${p.r}</td><td>${p.b}</td><td>${(p.r/p.b*100||0).toFixed(0)}</td></tr>`).join('')}
+                    </tbody>
+                </table>
+                <div class="section-head">BOWLING</div>
+                <table class="stats-table">
+                    <thead><tr><th>Bowler</th><th>O</th><th>R</th><th>W</th><th>Eco</th></tr></thead>
+                    <tbody>
+                        ${Object.keys(data.bowl).map(b => {
+                            let s = data.bowl[b];
+                            let ov = Math.floor(s.b/6) + "." + (s.b%6);
+                            let eco = s.b > 0 ? (s.r/(s.b/6)).toFixed(1) : "0.0";
+                            return `<tr><td>${b}</td><td>${ov}</td><td>${s.r}</td><td>${s.w}</td><td>${eco}</td></tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    });
+    return html;
+}
 function save() { history.push(JSON.stringify({state:JSON.parse(JSON.stringify(state)), p1:JSON.parse(JSON.stringify(p1)), p2:JSON.parse(JSON.stringify(p2)), isP1:striker===p1, currentBowler, lastBowler, inn1Data:JSON.parse(JSON.stringify(inn1Data)), inn2Data:JSON.parse(JSON.stringify(inn2Data))})); }
 function undo() { if(history.length > 0) { let l = JSON.parse(history.pop()); state=l.state; p1=l.p1; p2=l.p2; striker=l.isP1?p1:p2; currentBowler=l.currentBowler; lastBowler=l.lastBowler; inn1Data=l.inn1Data; inn2Data=l.inn2Data; updateUI(); } }
 </script>
