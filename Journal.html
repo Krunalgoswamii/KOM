@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TradeJournal</title>
+    <title>TradeJ</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -563,7 +563,7 @@
     let trades = [];
     let config = {};
     let editId = null, eChart, wlChart, mChart;
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzsX3v_ntypgx6pMRMMyv130e-l9UGYF3-god0mMAq3gnNkRbohTo4lupOllfr3w5L0/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFfVHp9EeygtZ-GZlJRC_G6qsjG0w8NUwTG6PscmJDbsmB1vLJGn1c0Kpt8ocvXhHq/exec";
 
 let candleChart;
 
@@ -974,24 +974,31 @@ function renderComparison() {
 // 1. Cloud par data save karne ke liye
 async function syncToCloud() {
     console.log("Syncing to cloud...");
+    
+    // Images ko sync se bahar nikalna zaruri hai (Size limit ki wajah se)
+    const cleanTrades = trades.map(t => {
+        const { images, ...rest } = t; // Images nikal di text bacha liya
+        return rest;
+    });
+
     const dataToSync = {
         action: "save",
         content: {
-            trades: trades,
+            trades: cleanTrades, // Sirf text data bhej rahe hain
             config: config,
             user: currentUser
         }
     };
 
     try {
+        // Hum simple form-submission method use karenge jo Google Apps Script ke liye best hai
         await fetch(SCRIPT_URL, {
             method: "POST",
-            mode: "no-cors", 
             body: JSON.stringify(dataToSync)
         });
-        console.log("Cloud Sync Request Sent!");
+        console.log("Data Sent to Cloud");
     } catch (e) {
-        console.error("Cloud Sync Failed:", e);
+        console.error("Sync Error:", e);
     }
 }
 
