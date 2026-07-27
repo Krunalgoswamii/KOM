@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Entry Rule Book</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-glass: rgba(15, 23, 42, 0.92);
+            --card-bg: #1e293b;
+            --card-hover: #26334d;
+            --accent-cyan: #38bdf8;
+            --accent-purple: #818cf8;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --shadow-glow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background: #090d16;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.12) 0px, transparent 50%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        /* Demo Trigger Button Page Styling */
+        .launcher-btn {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            color: #0f172a;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(56, 189, 248, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .launcher-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(56, 189, 248, 0.6);
+        }
+
+        /* Modal Backdrop */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(5, 8, 15, 0.75);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+            visibility: visible;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 9999;
+            padding: 15px;
+        }
+
+        .modal-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Compact Popup Container */
+        .modal-container {
+            width: 100%;
+            max-width: 580px;
+            max-height: 90vh;
+            background: var(--bg-glass);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            box-shadow: var(--shadow-glow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: scale(1);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.hidden .modal-container {
+            transform: scale(0.92);
+        }
+
+        /* Header */
+        .modal-header {
+            padding: 18px 24px;
+            background: rgba(30, 41, 59, 0.6);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-title i {
+            color: var(--accent-cyan);
+            font-size: 1.2rem;
+        }
+
+        .modal-title h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-close {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-close:hover {
+            background: var(--danger-color);
+            color: #fff;
+            border-color: var(--danger-color);
+        }
+
+        /* Scrollable Body */
+        .modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        /* Rule Card Styling */
+        .rule-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .rule-card:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .rule-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .rule-badge {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 6px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .rule-subtext {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            margin-left: 34px;
+            line-height: 1.3;
+        }
+
+        /* Checkbox Toggles */
+        .tf-grid {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            margin-left: 34px;
+            flex-wrap: wrap;
+        }
+
+        .tf-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tf-chip:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .tf-chip input {
+            display: none;
+        }
+
+        .custom-check {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            border: 1.5px solid var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .tf-chip input:checked + .custom-check {
+            background: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .custom-check::after {
+            content: '✓';
+            font-size: 10px;
+            color: #000;
+            font-weight: 900;
+            display: none;
+        }
+
+        .tf-chip input:checked + .custom-check::after {
+            display: block;
+        }
+
+        /* Interactive Standard Rule */
+        .interactive-rule {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .interactive-rule input {
+            display: none;
+        }
+
+        .interactive-rule .custom-check {
+            margin-top: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            flex-shrink: 0;
+        }
+
+        .interactive-rule input:checked + .custom-check {
+            background: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .interactive-rule input:checked + .custom-check::after {
+            font-size: 12px;
+        }
+
+        /* SL Input Box */
+        .sl-card-body {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+            margin-left: 34px;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            width: fit-content;
+        }
+
+        .sl-input {
+            width: 65px;
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: #fff;
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .sl-input:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .badge-max {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .sl-status {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Footer Dashboard */
+        .modal-footer {
+            padding: 16px 24px;
+            background: rgba(15, 23, 42, 0.95);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .dashboard-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .dash-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .dash-score {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--warning-color);
+            transition: color 0.3s ease;
+        }
+
+        .progress-track {
+            background: #334155;
+            height: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--warning-color), var(--success-color));
+            transition: width 0.4s ease, background 0.4s ease;
+        }
+
+        .footer-action-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .status-pill {
+            font-size: 0.82rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Trigger Button for Demo -->
+<button class="launcher-btn" onclick="toggleModal(true)">
+    <i class="fa-solid fa-book-bookmark"></i> Open Trading Entry Checklist
+</button>
+
+<!-- Popup Window Overlay -->
+<div class="modal-overlay" id="tradingModal">
+    <div class="modal-container">
+        
+        <!-- Modal Header -->
+        <div class="modal-header">
+            <div class="modal-title">
+                <i class="fa-solid fa-chart-line"></i>
+                <h2>Rule-Based Entry Book</h2>
+            </div>
+            <button class="btn-close" onclick="toggleModal(false)" title="Close Window">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body / Rules List -->
+        <div class="modal-body">
+            
+            <!-- Rule 1 -->
+            <div class="rule-card">
+                <div class="rule-header">
+                    <span class="rule-badge">1</span>
+                    Kya Market Support ya Resistance par hai?
+                </div>
+                <div class="rule-subtext">Jis bhi timeframe par SR confirm ho use tick karein (Atleast 1 zaroori hai)</div>
+                <div class="tf-grid">
+                    <label class="tf-chip">
+                        <input type="checkbox" class="calc-box" data-weight="1">
+                        <span class="custom-check"></span> 5 Min
+                    </label>
+                    <label class="tf-chip">
+                        <input type="checkbox" class="calc-box" data-weight="1">
+                        <span class="custom-check"></span> 15 Min
+                    </label>
+                    <label class="tf-chip">
+                        <input type="checkbox" class="calc-box" data-weight="1">
+                        <span class="custom-check"></span> 1 Hour
+                    </label>
+                    <label class="tf-chip">
+                        <input type="checkbox" class="calc-box" data-weight="1">
+                        <span class="custom-check"></span> 4 Hour
+                    </label>
+                </div>
+            </div>
+
+            <!-- Rule 2 -->
+            <div class="rule-card">
+                <label class="interactive-rule">
+                    <input type="checkbox" class="calc-box" data-weight="2">
+                    <span class="custom-check"></span>
+                    <div>
+                        <div class="rule-header">
+                            <span class="rule-badge">2</span> Directional Alignment
+                        </div>
+                        <div class="rule-subtext" style="margin-left:0; margin-top:2px;">
+                            Jis side trade le rahe ho, kya market me us side ki strong momentum hai?
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Rule 3 -->
+            <div class="rule-card">
+                <label class="interactive-rule">
+                    <input type="checkbox" class="calc-box" data-weight="2">
+                    <span class="custom-check"></span>
+                    <div>
+                        <div class="rule-header">
+                            <span class="rule-badge">3</span> Candle Covering (2nd Top/Bottom)
+                        </div>
+                        <div class="rule-subtext" style="margin-left:0; margin-top:2px;">
+                            Kya 2nd Top/Bottom ne last opposite candle ko poora cover kiya hai?
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Rule 4 -->
+            <div class="rule-card">
+                <label class="interactive-rule">
+                    <input type="checkbox" class="calc-box" data-weight="2">
+                    <span class="custom-check"></span>
+                    <div>
+                        <div class="rule-header">
+                            <span class="rule-badge">4</span> Liquidity & Trapping
+                        </div>
+                        <div class="rule-subtext" style="margin-left:0; margin-top:2px;">
+                            Kya market ne liquidity sweep ki hai ya retail traders ko trap kiya hai?
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Rule 5 (Stop Loss) -->
+            <div class="rule-card">
+                <div class="rule-header">
+                    <span class="rule-badge">5</span> Stop Loss Rule
+                    <span class="badge-max">MAX 4 PTS</span>
+                </div>
+                <div class="sl-card-body">
+                    <span style="font-size:0.8rem; color:var(--text-muted);">Enter SL Points:</span>
+                    <input type="number" id="sl-points" class="sl-input" placeholder="0" min="0" step="0.1">
+                    <span id="sl-validation-msg" class="sl-status" style="color: var(--text-muted);">Awaiting...</span>
+                </div>
+            </div>
+
+            <!-- Rule 6 -->
+            <div class="rule-card">
+                <label class="interactive-rule">
+                    <input type="checkbox" class="calc-box" data-weight="1">
+                    <span class="custom-check"></span>
+                    <div>
+                        <div class="rule-header">
+                            <span class="rule-badge">6</span> Big Candle Pullback
+                        </div>
+                        <div class="rule-subtext" style="margin-left:0; margin-top:2px;">
+                            Badi candle me kya min 60% pullback aaya hai? (Normal candle par bhi verify karein)
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+        </div>
+
+        <!-- Dashboard Footer -->
+        <div class="modal-footer">
+            <div class="dashboard-row">
+                <span class="dash-label">Trade Probability</span>
+                <span class="dash-score" id="score-display">0%</span>
+            </div>
+            
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-bar"></div>
+            </div>
+
+            <div class="footer-action-row">
+                <div class="status-pill" id="status-msg">
+                    <i class="fa-solid fa-circle-info"></i> Check rules before trade
+                </div>
+                <button class="btn-reset" onclick="resetForm()">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const checkboxes = document.querySelectorAll('.calc-box');
+    const slInput = document.getElementById('sl-points');
+    const slValidationMsg = document.getElementById('sl-validation-msg');
+    const scoreDisplay = document.getElementById('score-display');
+    const progressBar = document.getElementById('progress-bar');
+    const statusMsg = document.getElementById('status-msg');
+
+    // Base weight calculation
+    let baseWeight = 0;
+    checkboxes.forEach(box => {
+        baseWeight += parseFloat(box.getAttribute('data-weight'));
+    });
+    
+    const slMaxWeight = 2;
+    const totalPossibleWeight = baseWeight + slMaxWeight;
+
+    function calculateProbability() {
+        let currentWeight = 0;
+        let isSlValid = false;
+        
+        checkboxes.forEach(box => {
+            if (box.checked) {
+                currentWeight += parseFloat(box.getAttribute('data-weight'));
+            }
+        });
+
+        const slValue = parseFloat(slInput.value);
+        
+        if (!isNaN(slValue) && slInput.value.trim() !== "") {
+            if (slValue <= 4 && slValue > 0) {
+                currentWeight += slMaxWeight;
+                isSlValid = true;
+                slValidationMsg.innerText = "✓ Valid SL";
+                slValidationMsg.style.color = "var(--success-color)";
+            } else if (slValue > 4) {
+                isSlValid = false;
+                slValidationMsg.innerText = "✕ SL Too High (>4)";
+                slValidationMsg.style.color = "var(--danger-color)";
+            } else {
+                slValidationMsg.innerText = "Invalid SL";
+                slValidationMsg.style.color = "var(--text-muted)";
+            }
+        } else {
+            slValidationMsg.innerText = "Awaiting...";
+            slValidationMsg.style.color = "var(--text-muted)";
+        }
+
+        let percentage = Math.round((currentWeight / totalPossibleWeight) * 100);
+        
+        scoreDisplay.innerText = percentage + "%";
+        progressBar.style.width = percentage + "%";
+
+        // Dynamic Status Messaging & Colors
+        if (percentage === 0) {
+            scoreDisplay.style.color = "var(--warning-color)";
+            progressBar.style.background = "var(--warning-color)";
+            statusMsg.innerHTML = '<i class="fa-solid fa-circle-info"></i> Check rules before trade';
+            statusMsg.style.color = "var(--text-muted)";
+        } else if (!isSlValid && !isNaN(slValue) && slValue > 4) {
+            scoreDisplay.style.color = "var(--danger-color)";
+            progressBar.style.background = "var(--danger-color)";
+            statusMsg.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> SL limit exceeded!';
+            statusMsg.style.color = "var(--danger-color)";
+        } else if (percentage < 45) {
+            scoreDisplay.style.color = "var(--danger-color)";
+            progressBar.style.background = "var(--danger-color)";
+            statusMsg.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Low Probability Trade';
+            statusMsg.style.color = "var(--danger-color)";
+        } else if (percentage >= 45 && percentage < 75) {
+            scoreDisplay.style.color = "var(--warning-color)";
+            progressBar.style.background = "var(--warning-color)";
+            statusMsg.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Medium Prob (Half Qty)';
+            statusMsg.style.color = "var(--warning-color)";
+        } else {
+            scoreDisplay.style.color = "var(--success-color)";
+            progressBar.style.background = "var(--success-color)";
+            statusMsg.innerHTML = '<i class="fa-solid fa-circle-check"></i> High Prob - Ready to Execute!';
+            statusMsg.style.color = "var(--success-color)";
+        }
+    }
+
+    checkboxes.forEach(box => {
+        box.addEventListener('change', calculateProbability);
+    });
+    slInput.addEventListener('input', calculateProbability);
+
+    function resetForm() {
+        checkboxes.forEach(box => box.checked = false);
+        slInput.value = "";
+        calculateProbability();
+    }
+
+    // Modal Visibility Toggle
+    function toggleModal(show) {
+        const modal = document.getElementById('tradingModal');
+        if (show) {
+            modal.classList.remove('hidden');
+        } else {
+            modal.classList.add('hidden');
+        }
+    }
+</script>
+
+</body>
+</html>
