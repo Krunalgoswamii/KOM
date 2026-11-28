@@ -23,6 +23,10 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{background:#f6dcd8;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+html{scroll-behavior:smooth}
+.pulled .roll{pointer-events:none}
+.paper .loc-link{display:inline-block;margin-top:4px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dk);font-weight:600;text-decoration:none;border-bottom:1px solid rgba(201,162,75,.6);padding-bottom:1px;cursor:pointer}
+.paper .loc-link:active{transform:scale(.96)}
 html.lock,html.lock body{overflow:hidden;height:100%}
 body{
   margin:0;font-family:var(--sans);color:var(--ink);font-size:15px;line-height:1.55;
@@ -77,7 +81,7 @@ img{display:block;max-width:100%}
   display:grid;place-items:center;align-content:center;gap:12px;text-align:center
 }
 .cv-front img.mg{width:68%;height:auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
-.cv-front small{font-size:8.5px;letter-spacing:.34em;text-transform:uppercase;color:#ecd69b;font-weight:500}
+.cv-front small{font-size:12px;letter-spacing:.23em;text-transform:uppercase;color:#ecd69b;font-weight:500}
 .cv-front b{font:italic 500 15px var(--serif);color:#f3dfa6}
 .cv-in{transform:rotateY(180deg);background:linear-gradient(90deg,#5a1624,#7c2335);box-shadow:inset 0 0 0 8px #7c2335,inset 0 0 0 9px rgba(201,162,75,.8)}
 #hint{position:absolute;left:0;right:0;bottom:calc(9svh + env(safe-area-inset-bottom,0px));z-index:4;text-align:center;font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--wine);opacity:0;transition:opacity .8s ease}
@@ -135,14 +139,15 @@ h2{margin:8px 0 0;font:600 30px/1.2 var(--serif);color:var(--wine);text-wrap:bal
 .fin{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;text-align:center;padding:5.5svh 22px 3.5svh}
 .fp{opacity:0;transform:translate3d(0,10px,0);filter:blur(5px);transition:opacity .9s ease,transform .9s ease,filter .9s ease}
 .fp.on{opacity:1;transform:none;filter:none}
-.medal{width:clamp(46px,9svh,78px);height:clamp(46px,9svh,78px)}
+.medal{width:clamp(46px,9svh,78px);height:clamp(46px,9svh,78px);border-radius:50%;background:radial-gradient(circle,rgba(255, 232, 165, 0.541),rgba(246, 233, 211, 0.733));border:1.5px solid var(--gold);box-shadow:0 0 12px rgba(201, 161, 75, 0.521),0 6px 16px -6px rgba(74,37,86,.35);display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.6);transition:all 1s cubic-bezier(.2,1.2,.3,1)}
+.medal img{width:76%;height:auto;filter:contrast(1.2) brightness(.9)}
 .togtxt{font:italic 500 clamp(13px,2.2svh,17px) var(--serif);color:var(--wine)}
-.namez{font:700 clamp(28px,min(6.8svh,12.4vw),54px)/1.05 var(--serif);color:var(--wine);letter-spacing:.01em;text-shadow:0 1px 0 rgba(255,248,239,.8);white-space:nowrap}
+.namez{font:700 clamp(34px,min(8.2svh,14.5vw),66px)/1.05 var(--serif);color:var(--wine);letter-spacing:.01em;text-shadow:0 1px 0 rgba(255,248,239,.8);white-space:nowrap}
 .lt{display:inline-block;opacity:0;filter:blur(6px);transform:translate3d(0,5px,0);transition:opacity .55s ease,filter .55s ease,transform .55s ease}
 .lt.on{opacity:1;filter:none;transform:none}
 .rel{font-size:clamp(11px,1.75svh,13px);letter-spacing:.06em;color:var(--ink);font-weight:500}
 .rel em{font:italic 500 clamp(13px,2.1svh,16px) var(--serif);display:block;color:var(--muted);margin-bottom:2px}
-.amp{font:italic 400 clamp(24px,4.6svh,38px) var(--serif);color:var(--gold-dk)}
+.amp{font:italic 400 clamp(28px,5.4svh,44px) var(--serif);color:var(--gold-dk)}
 .invl{font-size:clamp(11px,1.7svh,13px);line-height:1.6;color:var(--ink);max-width:270px}
 .arrow{width:26px;height:38px;animation:ar 1.7s ease-in-out infinite}
 @keyframes ar{0%,100%{transform:translateY(-3px);opacity:.45}50%{transform:translateY(7px);opacity:1}}
@@ -225,9 +230,7 @@ h2{margin:8px 0 0;font:600 30px/1.2 var(--serif);color:var(--wine);text-wrap:bal
 .rf-fb h3{font:500 26px/1.1 var(--serif);color:var(--wine);margin:8px 0 0}
 .rf-place{font:300 12.5px/1.45 var(--sans);color:var(--ink);margin-top:8px;min-height:36px;display:flex;align-items:center;justify-content:center;gap:5px}
 .rf-place svg{width:13px;height:13px;flex:none;fill:#e08ea0}
-.rf-dress{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:10px;font:500 9.5px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--wine-deep)}
-.rf-dress em{font:italic 400 13px var(--serif);letter-spacing:0;text-transform:none;color:var(--wine)}
-.rf-sw{width:15px;height:15px;border-radius:50%;border:1px solid var(--gold);background:conic-gradient(#e08ea0,#ecd6ab,#9cc5a1,#8fb8e0,#b79ae0,#e08ea0)}
+.rf-note{margin-top:11px;font:italic 400 13.5px var(--serif);color:var(--gold-dk);letter-spacing:.02em}
 
 @keyframes rfbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes rfflick{from{transform:scale(1,.9) skewX(-4deg)}to{transform:scale(1.06,1.12) skewX(4deg)}}
@@ -314,7 +317,7 @@ h2{margin:8px 0 0;font:600 30px/1.2 var(--serif);color:var(--wine);text-wrap:bal
       <img class="bg" src="photos/bg-soft.jpg" alt="">
       <div class="wash"></div>
       <div class="fin">
-        <img class="medal gan fp" id="f0" data-r="gan" alt="Ganesh ji">
+        <img class="medal gan glow fp" id="f0" data-r="gan" alt="Ganesh ji">
         <div class="togtxt fp" id="f1">|| Shree Ganeshay Namah ||<br>Together with their families</div>
         <div class="namez" id="gname" aria-label="Krunal"></div>
         <div class="rel fp" id="gson"><em>Son of</em>Manojgiri &amp; Sonalben</div>
@@ -329,7 +332,7 @@ h2{margin:8px 0 0;font:600 30px/1.2 var(--serif);color:var(--wine);text-wrap:bal
 
   <!-- 3. SAVE THE DATE -->
   <section class="sec" id="std">
-    <div class="rv"><div class="eyebrow">Save the Date</div><h2>Pull the tassel</h2><p class="sub">to unroll our date</p></div>
+    <div class="rv"><div class="eyebrow">Save the Date</div><h2>Pull the tassel</h2><p class="sub">to reveal our special day</p></div>
     <div class="rodwrap" id="rodwrap">
       <div class="rod"></div>
       <div class="ghost">Our date awaits</div>
@@ -341,8 +344,9 @@ h2{margin:8px 0 0;font:600 30px/1.2 var(--serif);color:var(--wine);text-wrap:bal
         <div class="day">Thursday</div>
         <div class="big">25</div>
         <div class="mon">February 2027</div>
-        <div class="tm">Pheras at 6:30 PM</div>
-        <div class="pl">Samdi Chawk, Dharampur</div>
+        <div class="tm">Hasta Melap at 6:40 PM</div>
+        <div class="pl">At Dharampur</div>
+        <a href="#loc" class="loc-link">Location below ↓</a>
       </div>
       <div class="roll" id="roll"></div>
       <div class="pullg" id="pullg"><div class="tin"><div class="cord"></div><div class="bead"></div><div class="tuft"></div></div></div>
@@ -356,7 +360,7 @@ h2{margin:8px 0 0;font:600 30px/1.2 var(--serif);color:var(--wine);text-wrap:bal
 
   <!-- 4. FESTIVITIES -->
   <section class="sec" id="fest">
-    <div class="rv"><div class="eyebrow">Wedding functions</div><h2>Come celebrate with us</h2><p class="sub">Swipe through the days of joy</p></div>
+    <div class="rv"><div class="eyebrow">Wedding functions</div><h2>Celebrate with us</h2><p class="sub">Swipe through the days of joy</p></div>
     <div class="rf-car" id="car1"></div>
 <div class="rf-dots" id="dots1"></div>
   </section>
@@ -373,9 +377,9 @@ h2{margin:8px 0 0;font:600 30px/1.2 var(--serif);color:var(--wine);text-wrap:bal
     <div class="recep rvs" id="recep">
       <img class="fl a" data-r="rose_c" alt=""><img class="fl b" data-r="rose_a" alt="">
       <div class="eyebrow">Join us for the</div>
-      <h2>Grand Celebration</h2>
+      <h2>Grand Wedding Celebration</h2>
       <div class="big2">Thursday, 25 February 2027</div>
-      <p>Pheras at 6:30 PM</p>
+      <p>Hasta Melap at 6:40 PM</p>
       <p>Samdi Chawk, Dharampur</p>
       <p style="margin-top:14px;font-style:italic;font-family:var(--serif);letter-spacing:.02em;font-size:15px">Your blessings make our day complete.</p>
     </div>
@@ -383,7 +387,7 @@ h2{margin:8px 0 0;font:600 30px/1.2 var(--serif);color:var(--wine);text-wrap:bal
 
   <!-- 7. LOCATION -->
   <section class="sec" id="loc">
-    <div class="rv"><div class="eyebrow">Location</div><h2>Where we celebrate</h2><div class="orn"><i></i><i></i><i></i></div></div>
+    <div class="rv"><div class="eyebrow">Wedding Location</div><h2>Where we celebrate</h2><div class="orn"><i></i><i></i><i></i></div></div>
     <a class="map rvs" id="mapcard" href="https://maps.app.goo.gl/waGXjjmo8YrgF4Qg9?g_st=ic" target="_blank" rel="noopener" aria-label="Open the venue in Google Maps">
       <svg viewBox="0 0 320 230" role="img" aria-label="Illustrated map from Ramnath Ghela Mandir to Samdi Chawk, Dharampur">
         <rect width="320" height="230" fill="#f2e5d3"/>
@@ -394,10 +398,10 @@ h2{margin:8px 0 0;font:600 30px/1.2 var(--serif);color:var(--wine);text-wrap:bal
         <g stroke="#fffaf2" stroke-linecap="round" fill="none"><path d="M-10 120C60 112 110 140 170 120S280 96 330 112" stroke-width="13"/><path d="M96 -10C106 50 84 100 110 150S130 220 126 240" stroke-width="11"/><path d="M214 -10C206 40 232 80 218 130S226 200 236 240" stroke-width="11"/><path d="M-10 60C40 66 70 52 110 58" stroke-width="6"/><path d="M230 60C270 54 300 60 330 52" stroke-width="6"/></g>
         <path class="route" d="M46 124C74 118 96 134 126 128S196 112 224 124S244 96 258 92" fill="none" stroke="#6e1f2f" stroke-width="4" stroke-linecap="round"/>
         <circle cx="46" cy="124" r="8" fill="#fffaf2" stroke="#6e1f2f" stroke-width="3"/>
-        <text x="46" y="150" text-anchor="middle" font-size="9.5" font-weight="600" fill="#6e1f2f" font-family="Montserrat,sans-serif">Ramnath Ghela Mandir</text>
+        <text x="55" y="150" text-anchor="middle" font-size="8" font-weight="600" fill="#6e1f2f" font-family="Montserrat,sans-serif">Ramnath Ghela Mandir</text>
         <circle class="pulse" cx="258" cy="92" r="12" fill="#c9a24b"/>
         <g class="pin"><path d="M258 92c-13-17-20-26-20-38a20 20 0 0 1 40 0c0 12-7 21-20 38z" fill="#6e1f2f" stroke="#e7cf8e" stroke-width="2.5"/><circle cx="258" cy="54" r="7.500" fill="#fff8ef"/></g>
-        <text x="258" y="110" text-anchor="middle" font-size="9.5" font-weight="600" fill="#6e1f2f" font-family="Montserrat,sans-serif">Samdi Chawk</text>
+        <text x="280" y="110" text-anchor="middle" font-size="9.5" font-weight="600" fill="#6e1f2f" font-family="Montserrat,sans-serif">Dharampur</text>
       </svg>
       <span class="tap">Tap to open in Google Maps</span>
     </a>
@@ -414,7 +418,7 @@ h2{margin:8px 0 0;font:600 30px/1.2 var(--serif);color:var(--wine);text-wrap:bal
     <h2 class="rv" style="margin-top:22px">We can't wait to celebrate with you</h2>
     <div class="fam rv"><small>With the blessings of</small><span>Manojgiri &amp; Sonalben</span><span>Hirengiri &amp; Archnaben</span></div>
     <div class="love rv">With love</div>
-    <div class="rv" style="margin-top:8px;font:600 15px var(--serif);letter-spacing:.2em;color:var(--gold-dk)">Krunal &amp; KRISHNA</div>
+    <div class="rv" style="margin-top:8px;font:600 15px var(--serif);letter-spacing:.2em;color:var(--gold-dk)">KRUNAL &amp; KRISHNA</div>
   </section>
 </main>
 
@@ -628,12 +632,12 @@ var ICON={
  phera:function(){return '<svg viewBox="0 0 64 64"><g fill="none" stroke="#b8925a" stroke-width="3"><circle cx="26" cy="36" r="14" class="rf-bob"/><circle cx="40" cy="36" r="14" stroke="#e08ea0" class="rf-bob" style="animation-delay:.3s"/></g><path d="M33 12l4 6-4 6-4-6z" fill="#8a1f3d"/></svg>'}
 };
 var FN=[
- {n:'Ganesh Sthapna',day:'Wednesday · 24 Feb 2027',t:'8:11 AM',pl:'Ramnath Ghela Mandir',sc:'ganesh',ic:'ganesh'},
- {n:'Mandap Muhurat',day:'Wednesday · 24 Feb 2027',t:'8:30 AM',pl:'Ramnath Ghela Mandir',sc:'mandap',ic:'mandap'},
- {n:'Haldi',day:'Wednesday · 24 Feb 2027',t:'9:30 AM',pl:'Ramnath Ghela Mandir',sc:'haldi',ic:'haldi'},
- {n:'Grah Shanti',day:'Wednesday · 24 Feb 2027',t:'3:30 PM',pl:'Ramnath Ghela Mandir',sc:'grah',ic:'grah'},
- {n:'Jaan Prasthan',day:'Thursday · 25 Feb 2027',t:'2:15 PM',pl:'From Ramnath Ghela Mandir to Dharampur',sc:'jaan',ic:'jaan'},
- {n:'Pheras',day:'Thursday · 25 Feb 2027',t:'6:30 PM',pl:'Samdi Chawk, Dharampur',sc:'phera',ic:'phera'}
+ {n:'Ganesh Sthapna',day:'Wednesday · 24 Feb 2027',t:'8:11 AM',pl:'Ramnath Ghela Mandir',sc:'ganesh',ic:'ganesh',note:'Divine beginnings & grace'},
+ {n:'Mandap Muhurat',day:'Wednesday · 24 Feb 2027',t:'8:30 AM',pl:'Ramnath Ghela Mandir',sc:'mandap',ic:'mandap',note:'Sacred vows under the canopy'},
+ {n:'Haldi',day:'Wednesday · 24 Feb 2027',t:'9:30 AM',pl:'Ramnath Ghela Mandir',sc:'haldi',ic:'haldi',note:'Golden laughter & turmeric'},
+ {n:'Grah Shanti',day:'Wednesday · 24 Feb 2027',t:'3:30 PM',pl:'Ramnath Ghela Mandir',sc:'grah',ic:'grah',note:'Peace, harmony & blessings'},
+ {n:'Jaan Prasthan',day:'Thursday · 25 Feb 2027',t:'2:15 PM',pl:'From Ramnath Ghela Mandir to Dharampur',sc:'jaan',ic:'jaan',note:'Joyful procession & dhol beats'},
+ {n:'Hasta Melap',day:'Thursday · 25 Feb 2027',t:'6:40 PM',pl:'Dharampur',sc:'phera',ic:'phera',note:'Seven steps into forever'}
 ];
 var PH=[['photos/photo-1.jpg','Every glance, a promise'],['photos/photo-2.jpg','Wherever you are, home'],['photos/photo-3.jpg','Our forever begins']];
 function sw(c){return /^any/i.test(c)?'<i class="sw any"></i>':'<i class="sw" style="background:'+c+'"></i>'}
@@ -647,7 +651,7 @@ function build(){
         +'<div class="rf-time">'+f.t+'</div>'
         +'<h3>'+f.n+'</h3>'
         +'<div class="rf-place">'+PIN+'<span>'+f.pl+'</span></div>'
-        +'<div class="rf-dress"><span>Dress code</span><em>Traditional</em><i class="rf-sw"></i><em>Any</em></div>'
+        +'<div class="rf-note">'+f.note+'</div>'
       +'</div></article>';
   }).join('');
 
@@ -675,7 +679,7 @@ var TARGET=Date.UTC(2027,1,25,13,0,0); /* 6:30 PM IST */
 function p2(n){return n<10?'0'+n:''+n}
 function cd(){var d=TARGET-Date.now(),el=$('#cd');if(d<=0){el.textContent='Today is the day';return}var s=Math.floor(d/1000);el.textContent=Math.floor(s/86400)+' days · '+p2(Math.floor(s%86400/3600))+' hrs · '+p2(Math.floor(s%3600/60))+' min · '+p2(s%60)+' sec'}
 var cdT=0;
-$('#cal').href='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('Krunal weds Krishna')+'&dates=20270225T130000Z/20270225T163000Z&details='+encodeURIComponent('Pheras at 6:30 PM. With love, the families of Manojgiri & Sonalben and Hirengiri & Archnaben.')+'&location='+encodeURIComponent('Samdi Chawk, Dharampur');
+$('#cal').href='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('Krunal weds Krishna')+'&dates=20270225T130000Z/20270225T163000Z&details='+encodeURIComponent('Hasta Melap at 6:40 PM. With love, the families of Manojgiri & Sonalben and Hirengiri & Archnaben.')+'&location='+encodeURIComponent('Samdi Chawk, Dharampur');
 
 /* ---------- copy address ---------- */
 $('#copyaddr').addEventListener('click',function(){var b=this,t='Samdi Chawk, Dharampur';function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy address'},1800)}
